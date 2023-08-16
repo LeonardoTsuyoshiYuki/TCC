@@ -43,7 +43,7 @@ function AuthProvider ({ children }) {
     const hasUser = usersStorage?.filter((user) => user.matricula === matricula);
 
     if (hasUser?.length) {
-      return "Já tem uma conta com esse E-mail";
+      return "Já tem uma conta com esse Matricula";
     }
 
     let newUser;
