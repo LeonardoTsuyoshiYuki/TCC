@@ -7,7 +7,6 @@ export const Container = styled.div`
     box-shadow: 0 0 20px 3px;
 
     > svg{
-        position: fixed;
         color: #e0f7fa;
         width: 30px;
         height: 30px;
@@ -15,4 +14,6 @@ export const Container = styled.div`
         margin-left: 32px;
         cursor: pointer;
     }
-`
+    `
+    
+ 

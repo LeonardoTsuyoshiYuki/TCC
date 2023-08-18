@@ -4,6 +4,7 @@ import Home from "../pages/Home"
 import SignIn from "../pages/SignIn"
 import SignUp from "../pages/SignUp"
 import useAuth from "../hooks/useAuth"
+import Colaborador from "../pages/Colaborador"
 
 function Private({ Item }) {
     const { signed } = useAuth();
@@ -20,6 +21,8 @@ function RoutesApp(){
                     <Route path="/" element={<SignIn />} />
                     <Route exact path="/signup" element={<SignUp />} />
                     <Route path="*" element={<SignIn />} />
+                    <Route exact path="/colaborador" element={<Private Item={Colaborador}/>} />
+                    <Route path="/" element={<SignIn />} />
                 </Routes>
             </Fragment>
         </BrowserRouter>

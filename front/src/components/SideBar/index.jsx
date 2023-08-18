@@ -1,31 +1,64 @@
 import React from "react";
 import * as C from "./styles"
+import useAuth from "../../hooks/useAuth";
+
 import {
     FaTimes,
     FaHome,
-    FaEnvelope,
+    // FaEnvelope,
+    FaTrashAlt,
     // FaRegSun,
-    // FaUserAlt,
+    FaUserAlt,
     // FaIdCardAlt,
     // FaRegFileAlt,
     // FaRegCalendarAlt,
     // FaChartBar
 } from "react-icons/fa"
 
-import SideBarItem from "../SideBarItem"
+import { useNavigate } from "react-router-dom";
 
 
-    function SideBar({active}){
-        function closeSideBar (){
-          active(false)
-        }
-    
-    return(
+
+function SideBar({ active, Text }) {
+    const { signout } = useAuth()
+    const navigate = useNavigate()
+
+    function handleClickColaborador() {
+        navigate("/colaborador")
+    }
+    function closeSideBar() {
+        active(false)
+    }
+
+
+    return (
         <C.Container sidebar={active}>
             <FaTimes onClick={closeSideBar} />
             <C.Content>
-                <SideBarItem Icon={FaHome} Text="Inicio" />
-                <SideBarItem Icon={FaEnvelope} Text="Statistcs" />
+                
+
+                <C.ContainerIcon
+                onClick={()=>{
+                    navigate("/home")
+                }}>
+                    <FaHome />
+                    LISTAGEM
+                </C.ContainerIcon>
+
+                <C.ContainerIcon  onClick={handleClickColaborador} >
+                    <FaUserAlt />
+                    COLABORADORES
+                </C.ContainerIcon>
+
+                <C.ContainerIcon 
+                    onClick={() => [
+                        signout(),
+                        navigate("/")
+                    ]}>
+                    <FaTrashAlt />
+                    SAIR
+                </C.ContainerIcon>
+
                 {/* <SideBarItem Icon={FaRegSun} Text="" />
                 <SideBarItem Icon={FaUserAlt} Text="" />
                 <SideBarItem Icon={FaIdCardAlt} Text="" />

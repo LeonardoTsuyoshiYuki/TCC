@@ -63,7 +63,7 @@ function SignUp() {
     }
     return (
         <C.Container>
-            <C.Label>oi</C.Label>
+            <C.Label>Cadastro Colaborador</C.Label>
             <C.Content>
                 <Input
                     type="Nome"
