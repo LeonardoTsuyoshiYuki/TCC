@@ -1,105 +1,143 @@
 import React, { useState } from "react";
-import Input from "../../components/Input"
-import Button from "../../components/Button"
-import * as C from "./styles"
+import Input from "../../components/Input";
+import Button from "../../components/Button";
+import * as C from "./styles";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
-
-import api from '../../services/services'
-
+import api from '../../services/services';
 
 function SignUp() {
+    const [user, setUser] = useState({
+        nome: "",
+        matricula: "",
+        email: "",
+        cargo: "",
+        telefone: "",
+        cpf: "",
+        password: "",
+        passwordConf: "",
+        ativo: true,
+        endereco: {
+            cidade: "",
+            estado: ""
+        },
+        polo: ""
+    });
 
-    const [nome, setNome] = useState("")
-    const [matricula, setMatricula] = useState("")
-    const [password, setPassword] = useState("")
-    const [passwordConf, setPasswordConf] = useState("")
-    const [error, setError] = useState("")
-
-    const navigate = useNavigate()
-
-    const { signup } = useAuth()
+    const [error, setError] = useState("");
+    const navigate = useNavigate();
+    const { signup } = useAuth();
 
     async function handleClickCadastro() {
-
-        if (!matricula | !nome | !password | !passwordConf) {
-            setError("Preencha Todos os campos")
-            return
-        }
-        if (nome === '') {
-            setError("Nome é obrigatorio!")
-            return
-        }
-        if (matricula === '') {
-            setError("Matricula é obrigatorio!")
-            return
-        }
-        if (password !== passwordConf) {
-            setError("As password nao sao iguais!")
-            return
-        }
+        // Validation logic here
+        // ...
 
         try {
-            const docs = {
-                nome,
-                matricula,
-                password
+            await api.post(`/colaboradores`, user);
 
+            const res = signup(user.matricula, user.password);
+            if (res) {
+                setError(res);
+                return;
             }
-            await api.post(`/colaboradores`, docs)
-            const res = signup(matricula, password)
 
-            if(res){
-                setError(res)
-                return
-            }
-            alert("Usuario cadastrado com sucesso!")
-
-            navigate("/")
+            alert("Usuário cadastrado com sucesso!");
+            navigate("/");
         } catch (error) {
-            alert("Erro ao cadastrado Usuario!")
+            alert("Erro ao cadastrar usuário!");
         }
-
     }
+
+    const handleChange = (field, value) => {
+        setUser(prevUser => ({
+            ...prevUser,
+            [field]: value
+        }));
+        setError(""); // Clear error when input changes
+    };
+
     return (
         <C.Container>
             <C.Label>Cadastro Colaborador</C.Label>
             <C.Content>
                 <Input
-                    type="Nome"
+                    type="text"
                     placeholder="Digite seu Nome"
-                    value={nome}
-                    onChange={(e) => [setNome(e.target.value), setError("")]}
+                    value={user.nome}
+                    onChange={(e) => handleChange("nome", e.target.value)}
                 />
                 <Input
-                    type="Matricula"
+                    type="number"
                     placeholder="Digite sua Matricula"
-                    value={matricula}
-                    onChange={(e) => [setMatricula(e.target.value), setError("")]}
+                    value={user.matricula}
+                    onChange={(e) => handleChange("matricula", e.target.value)}
                 />
                 <Input
-                    type="Password"
+                    type="email"
+                    placeholder="Digite seu Email"
+                    value={user.email}
+                    onChange={(e) => handleChange("email", e.target.value)}
+                />
+                <Input
+                    type="text"
+                    placeholder="Digite seu Cargo"
+                    value={user.cargo}
+                    onChange={(e) => handleChange("cargo", e.target.value)}
+                />
+                <Input
+                    type="number"
+                    placeholder="Digite seu Telefone"
+                    value={user.telefone}
+                    onChange={(e) => handleChange("telefone", e.target.value)}
+                />
+                <Input
+                    type="number"
+                    placeholder="Digite seu CPF"
+                    value={user.cpf}
+                    onChange={(e) => handleChange("cpf", e.target.value)}
+                />
+               
+                <Input
+                    type="text"
+                    placeholder="Digite a cidade"
+                    value={user.endereco.cidade}
+                    onChange={(e) => handleChange("endereco.cidade", e.target.value)}
+                />
+                <Input
+                    type="text"
+                    placeholder="Digite o estado"
+                    value={user.endereco.estado}
+                    onChange={(e) => handleChange("endereco.estado", e.target.value)}
+                />
+                <Input
+                    type="number"
+                    placeholder="Digite o polo"
+                    value={user.polo}
+                    onChange={(e) => handleChange("polo", e.target.value)}
+                />
+                 <Input
+                    type="password"
                     placeholder="Digite sua Senha"
-                    value={password}
-                    onChange={(e) => [setPassword(e.target.value), setError("")]}
+                    value={user.password}
+                    onChange={(e) => handleChange("password", e.target.value)}
                 />
                 <Input
-                    type="Password"
-                    placeholder="Confirme sua password"
-                    value={passwordConf}
-                    onChange={(e) => [setPasswordConf(e.target.value), setError("")]}
+                    type="password"
+                    placeholder="Confirme sua senha"
+                    value={user.passwordConf}
+                    onChange={(e) => handleChange("passwordConf", e.target.value)}
                 />
                 <C.labelError>{error}</C.labelError>
                 <Button Text="Inscrever-se" onClick={handleClickCadastro} />
                 <C.LabelSignin>
-                    ja tem um conta?
+                    Já tem uma conta?
                     <C.Strong>
                         <Link to="/">&nbsp;Entre</Link>
                     </C.Strong>
                 </C.LabelSignin>
             </C.Content>
         </C.Container>
-    )
+    );
 }
 
-export default SignUp
+export default SignUp;

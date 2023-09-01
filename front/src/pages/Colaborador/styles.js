@@ -14,4 +14,8 @@ export const Container = styled.div`
 
 export const Title = styled.h2`
   color:white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
 `;
