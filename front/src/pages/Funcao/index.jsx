@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Tab, Tabs, TabContainer, Container, Form, Stack, Button } from 'react-bootstrap';
+import { Tab, Tabs, TabContainer, Container, Form, Stack } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Header from '../../components/Header'; // Importe o componente Header
@@ -8,7 +8,7 @@ import ListaFuncao from './ListaFuncao'; // Importe o componente ListaFuncao
 import api from '../../services/services';
 import GlobalStyle from '../../styles/global';
 
-function Funcao() {
+function Funcao(props) {
   const [searchValueFuncao, setSearchValueFuncao] = useState('');
   const [funcoes, setFuncoes] = useState([]);
   const [nome, setNome] = useState("");

@@ -5,7 +5,8 @@ import { Table, Button, Modal, Form  } from "react-bootstrap";
 import 'react-toastify/dist/ReactToastify.css';
 import api from "../../../services/services";
 
-function ListaFuncao({ funcoes, searchValue, setFuncoes }) {
+function ListaFuncao(props) {
+  const { funcoes, searchValue, setFuncoes } = props
   const [filteredFuncoes, setFilteredFuncoes] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedFunction, setSelectedFunction] = useState({
@@ -56,8 +57,8 @@ function ListaFuncao({ funcoes, searchValue, setFuncoes }) {
 
   const fetchFuncoes = async () => {
     try {
-      const response = await api.get('/funcao');
-      setFuncoes(response.data.docs);
+      const retorno = await api.get('/funcao');
+      setFuncoes(retorno.data.docs);
     } catch (error) {
       toast.error("Erro ao buscar as Funções.");
     }
@@ -65,12 +66,12 @@ function ListaFuncao({ funcoes, searchValue, setFuncoes }) {
 
   const handleSaveChanges = async () => {
     try {
-      const response = await api.put(`/funcao/${selectedFunction._id}`, {
+      const retorno = await api.put(`/funcao/${selectedFunction._id}`, {
         nome: selectedFunction.nome,
         tipo: selectedFunction.tipo
       });
 
-      if (response.status === 200) {
+      if (retorno.status === 200) {
         toast.success("Alterações salvas com sucesso.");
         fetchFuncoes();
         closeModal();
@@ -95,7 +96,7 @@ function ListaFuncao({ funcoes, searchValue, setFuncoes }) {
           </tr>
         </thead>
         <tbody>
-          {filteredFuncoes.map((funcaoItem) => (
+          {filteredFuncoes? filteredFuncoes.map((funcaoItem) => (
             <tr key={funcaoItem._id}>
               <td>{funcaoItem.nome}</td>
               <td>{funcaoItem.tipo}</td>
@@ -110,7 +111,7 @@ function ListaFuncao({ funcoes, searchValue, setFuncoes }) {
                 </Button>
               </td>
             </tr>
-          ))}
+          )): []}
         </tbody>
       </Table>
       <ToastContainer autoClose={2000} position={toast.POSITION.BOTTOM_LEFT} />

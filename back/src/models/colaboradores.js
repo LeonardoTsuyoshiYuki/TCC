@@ -25,8 +25,7 @@ const UserSchema = new mongoose.Schema({
     },
     cargo:{
         type: String,
-        require: true, 
-        unique: true,
+        require: true,
         uppercase: true,
     },
     telefone:{
@@ -60,13 +59,14 @@ const UserSchema = new mongoose.Schema({
             required: true,
             minlength: 2,
             maxlength: 2,
-        }
-    },
-    polo:{
+        },
+        polo:{
             type: Number,
             required: true,
             length: 5,
-        },
+        }
+    },
+    
     registro: {
         type: Date,
         default: Date.now
