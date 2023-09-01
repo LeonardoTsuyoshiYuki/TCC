@@ -5,8 +5,9 @@ import { Table, Button, Modal, Form } from 'react-bootstrap';
 import api from "../../../services/services";
 import 'react-toastify/dist/ReactToastify.css';
 
-function ListaProdutos({ produtos, searchValue, setProdutos }) {
-  console.log("***************produtos", produtos)
+function ListaProdutos(props) {
+  const { produtos, searchValueProdutos, setProdutos } = props;
+  
   const [filteredProdutos, setFilteredProdutos] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedProduto, setSelectedProduto] = useState({
@@ -19,31 +20,68 @@ function ListaProdutos({ produtos, searchValue, setProdutos }) {
 
   useEffect(() => {
     filterProdutos();
-  }, [produtos, searchValue]);
+  }, [produtos, searchValueProdutos]);
+
+  const formatDate = (date) => {
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+    return new Date(date).toLocaleDateString('pt-BR', options);
+  };
 
   const filterProdutos = () => {
+    const searchValue = searchValueProdutos.trim().toLowerCase();
+
     if (searchValue === "") {
       setFilteredProdutos(produtos);
     } else {
-      const filtered = produtos.filter(produtoItem =>
-        produtoItem.nome.toLowerCase().includes(searchValue.toLowerCase()) ||
-        produtoItem.CAnumercao.toLowerCase().includes(searchValue.toLowerCase()) ||
-        produtoItem.validadeCA.toLowerCase().includes(searchValue.toLowerCase()) ||
-        produtoItem.fabricacao.toLowerCase().includes(searchValue.toLowerCase())
-      );
+      const filtered = produtos.filter((produtoItem) => {
+        const nome = produtoItem.nome.toLowerCase();
+        const caNumero = produtoItem.CAnumercao.toLowerCase();
+        const validadeCA = formatDate(produtoItem.validadeCA); // Formatar a data de validade
+        const fabricacao = formatDate(produtoItem.fabricacao); // Formatar a data de fabricação
+
+        return (
+          nome.includes(searchValue) ||
+          caNumero.includes(searchValue) ||
+          validadeCA.includes(searchValue) ||
+          fabricacao.includes(searchValue)
+        );
+      });
+
       setFilteredProdutos(filtered);
     }
   };
 
   const handleDeleteProduto = async (id) => {
     try {
-      await api.delete(`/produto/${id}`);
-      toast.success("Produto excluído com sucesso.");
-      fetchProdutos();
+      await api.delete(`/produtos/${id}`);
+      toast.success("Produto excluída com sucesso.");
     } catch (error) {
-      toast.error("Erro ao excluir o Produto.");
+      toast.error("Erro ao excluir a Produto.");
     }
   };
+
+  const handleSaveChanges = async () => {
+    try {
+      const response = await api.put(`/produto/${selectedProduto._id}`, {
+        nome: selectedProduto.nome,
+        CAnumercao: selectedProduto.CAnumercao,
+        validadeCA: selectedProduto.validadeCA,
+        fabricacao: selectedProduto.fabricacao,
+      });
+  
+      if (response.status === 200) {
+        toast.success("Alterações salvas com sucesso.");
+        produtos(); 
+        closeModal();
+      } else {
+        toast.error("Erro ao salvar as alterações.");
+      }
+    } catch (error) {
+      console.error("Erro ao salvar as alterações:", error);
+      toast.error("Erro ao salvar as alterações.");
+    }
+  };
+  
 
   const openModal = (produtoItem) => {
     setSelectedProduto(produtoItem);
@@ -59,39 +97,7 @@ function ListaProdutos({ produtos, searchValue, setProdutos }) {
       fabricacao: "",
     });
     setShowModal(false);
-  };
-
-  const fetchProdutos = async () => {
-    try {
-      const response = await api.get('/produtos');
-      setProdutos(response.data.docs);
-    } catch (error) {
-      toast.error("Erro ao buscar os Produtos.");
-    }
-  };
-
-  const handleSaveChanges = async () => {
-    try {
-      const response = await api.put(`/produto/${selectedProduto._id}`, {
-        nome: selectedProduto.nome,
-        CAnumercao: selectedProduto.CAnumercao,
-        validadeCA: selectedProduto.validadeCA,
-        fabricacao: selectedProduto.fabricacao,
-      });
-
-      if (response.status === 200) {
-        toast.success("Alterações salvas com sucesso.");
-        fetchProdutos();
-        closeModal();
-      } else {
-        toast.error("Erro ao salvar as alterações.");
-      }
-    } catch (error) {
-      console.error("Erro ao salvar as alterações:", error);
-      toast.error("Erro ao salvar as alterações.");
-    }
-  };
-
+  }
   return (
     <>
       <Table striped bordered hover>
@@ -170,7 +176,7 @@ function ListaProdutos({ produtos, searchValue, setProdutos }) {
                 onChange={(e) =>
                   setSelectedProduto({
                     ...selectedProduto,
-                    validadeCA: e.target.value,
+                    Fabricação: e.target.value,
                   })
                 }
               />

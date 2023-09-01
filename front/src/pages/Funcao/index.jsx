@@ -11,33 +11,39 @@ import GlobalStyle from '../../styles/global';
 function Funcao() {
   const [searchValueFuncao, setSearchValueFuncao] = useState('');
   const [funcoes, setFuncoes] = useState([]);
+  const [nome, setNome] = useState("");
+  const [tipo, setTipo] = useState("");
+  const [atualizarTabela, setAtualizarTabela ] = useState(false);
 
-  useEffect(() => {
-    fetchFuncoes();
-  }, []);
+  useEffect( () => {
+     BuscaFuncao();
+  }, [atualizarTabela]);
 
-  const fetchFuncoes = async () => {
+  async function BuscaFuncao () {
     try {
-      const response = await api.get('/funcao');
-      setFuncoes(response.data.docs);
+      const retorno = await api.get('/funcao');
+      setFuncoes(retorno.data.docs);
+      setAtualizarTabela()
     } catch (error) {
       console.error('Erro ao buscar funções:', error);
     }
   };
 
-  const handleSearchFuncao = async () => {
+   async function handleSearchFuncao () {
     try {
-      const response = await api.get('/funcao', {
+      const retorno = await api.get('/funcao', {
         params: {
           search: searchValueFuncao // Envie o valor de busca para o backend
         }
       });
-      setFuncoes(response.data.docs); // Atualize o estado com os resultados da busca
+      setFuncoes(retorno.data.docs); // Atualize o estado com os resultados da busca
     } catch (error) {
       console.error('Erro ao buscar funções:', error);
       toast.error('Erro ao buscar funções.');
     }
   };
+ 
+
 
   return (
     <>
@@ -71,7 +77,13 @@ function Funcao() {
               />
             </Tab>
             <Tab eventKey="profile" title="Cadastro">
-              <CadastroFuncao />
+              <CadastroFuncao 
+                nome={nome}
+                setNome={setNome}
+                tipo={tipo}
+                setTipo={setTipo}
+                atualizarTabela={setAtualizarTabela}
+              />
             </Tab>
           </Tabs>
         </TabContainer>

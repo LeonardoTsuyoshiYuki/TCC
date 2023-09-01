@@ -2,21 +2,12 @@ import React, { useState, useEffect } from "react";
 import api from "../../../services/services";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { ToastContainer, toast } from "react-toastify";
-import { Container, Row, Form, Button, ListGroup } from "react-bootstrap";
+import { Container, Row, Form, Button } from "react-bootstrap";
 
-function CadastroFuncao({ atualizarListagem }) {
-    const [nome, setNome] = useState("");
-    const [tipo, setTipo] = useState("");
-    const [funcoes, setFuncoes] = useState([]);
+function CadastroFuncao(props) {
+    const { nome, setNome, tipo, setTipo, atualizarTabela } = props
+   
 
-    async function fetchFuncoes() {
-        try {
-            const response = await api.get("/funcoes");
-            setFuncoes(response.data);
-        } catch (error) {
-            console.error("Erro ao buscar funções:", error);
-        }
-    }
 
     async function handleCreateFuncao() {
         try {
@@ -26,17 +17,15 @@ function CadastroFuncao({ atualizarListagem }) {
           };
     
           await api.post("/funcao", dados);
-    
+          atualizarTabela(true)
+          setNome('')
+          setTipo('')
           toast.success("Função criada com sucesso.");
-          atualizarListagem(); // Chama a função para atualizar a listagem
         } catch (error) {
           toast.error("Erro ao criar a Função.");
         }
       }
 
-    useEffect(() => {
-        fetchFuncoes(); // Busca as funções quando o componente é montado
-    }, []);
 
     return (
         <Container>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Tab, Tabs, TabContainer, Container, Form, Stack, Button } from 'react-bootstrap';
+import { Tab, Tabs, TabContainer, Container, Form, Stack } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Header from '../../components/Header';
@@ -8,46 +8,43 @@ import ListaProdutos from './ListaProdutos'; // Importe o componente ListaProdut
 import api from '../../services/services';
 import GlobalStyle from '../../styles/global';
 
-function Produtos() {
-  const [searchValueProduto, setSearchValueProduto] = useState('');
-  const [produtos, setProdutos] = useState();
+function Produtos(props) {
+  const [searchValueProdutos, setSearchValueProdutos] = useState('');
+  const [produtos, setProsutos] = useState();
 
   useEffect(() => {
-    fetchProdutos();
+    BuscaProduto();
   }, []);
 
-  const fetchProdutos = async () => {
+  async function BuscaProduto (){
     try {
-      const response = await api.get('/produtos'); // Use a rota correta para produtos
-      console.error('*******************response:', response);
-      
-      setProdutos(response);
-
+      const retorno = await api.get('/produtos');
+      // console.log("**********retornoProdutos", retorno)
+      setProsutos(retorno.data.docs)
     } catch (error) {
-      console.error('Erro ao buscar produtos:', error);
+      console.error('Erro ao buscar os dados de Produtos:', error);
     }
   };
 
-
-  const handleSearchProduto = async () => {
+  async function handleSearchFuncao(){
     try {
-      const response = await api.get('/produtos', {
+      const retorno = await api.get('/produtos', {
         params: {
-          search: searchValueProduto
+          search: searchValueProdutos // Envie o valor de busca para o backend
         }
       });
-      setProdutos(response.data.docs);
+      setProsutos(retorno.data.docs); // Atualize o estado com os resultados da busca
     } catch (error) {
-      console.error('Erro ao buscar produtos:', error);
-      toast.error('Erro ao buscar produtos.');
+      console.error('Erro ao buscar o Produto:', error);
+      toast.error('Erro ao buscar o Produto.');
     }
   };
 
   return (
     <>
-      <Header />
+     <Header />
 
-      <Container>
+       <Container>
         <h1 style={{ textAlign: 'center', color: 'white' }}>PRODUTOS</h1>
         <br />
         <TabContainer>
@@ -62,22 +59,19 @@ function Produtos() {
                 <Form.Control
                   type="search"
                   placeholder="Filtrar por Nome ou C.A"
-                  value={searchValueProduto}
-                  onChange={(e) => setSearchValueProduto(e.target.value)}
+                  value={searchValueProdutos}
+                  onChange={(e) => setSearchValueProdutos(e.target.value)}
                 />
-                <Button variant="primary" onClick={handleSearchProduto}>
-                  Buscar
-                </Button>
               </Stack>
               <br/>
               <ListaProdutos
                 produtos={produtos}
-                searchValue={searchValueProduto}
-                setProdutos={setProdutos}
+                searchValueProdutos={searchValueProdutos}
+                setProsutos={setProsutos}
               />
             </Tab>
             <Tab eventKey="profile" title="Cadastro">
-              <CadastroProdutos />
+              {/* <CadastroProdutos /> */}
             </Tab>
           </Tabs>
         </TabContainer>
