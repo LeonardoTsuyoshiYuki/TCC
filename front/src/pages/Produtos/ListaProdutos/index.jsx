@@ -1,140 +1,164 @@
-import React, { useState, useEffect } from "react";
-import { FaTrash, FaSearch } from "react-icons/fa";
-import { ToastContainer, toast } from "react-toastify";
-import { Table, Button, Modal, Form } from 'react-bootstrap';
-import api from "../../../services/services";
+import React, { useState, useEffect } from 'react';
+import { Button, Form, Modal, Table } from 'react-bootstrap';
+import { FaTrash, FaEdit  } from 'react-icons/fa';
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import api from '../../../services/services';
 
 function ListaProdutos(props) {
-  const { produtos, searchValueProdutos, setProdutos } = props;
-  
+  const { produtos, searchValueProdutos } = props;
+
   const [filteredProdutos, setFilteredProdutos] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedProduto, setSelectedProduto] = useState({
-    _id: "",
-    nome: "",
-    CAnumercao: "",
-    validadeCA: "",
-    fabricacao: "",
+    _id: '',
+    nome: '',
+    codigoCA: '',
+    validadeCA: '',
+    fabricacao: '',
+    quantidade: '',
   });
 
   useEffect(() => {
     filterProdutos();
+
   }, [produtos, searchValueProdutos]);
 
-  const formatDate = (date) => {
-    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+  function formatDate(date) {
+    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
     return new Date(date).toLocaleDateString('pt-BR', options);
-  };
+  }
 
-  const filterProdutos = () => {
+  function filterProdutos() {
     const searchValue = searchValueProdutos.trim().toLowerCase();
 
-    if (searchValue === "") {
-      setFilteredProdutos(produtos);
+    if (searchValue === '') {
+      setFilteredProdutos(produtos || []);
     } else {
-      const filtered = produtos.filter((produtoItem) => {
-        const nome = produtoItem.nome.toLowerCase();
-        const caNumero = produtoItem.CAnumercao.toLowerCase();
-        const validadeCA = formatDate(produtoItem.validadeCA); // Formatar a data de validade
-        const fabricacao = formatDate(produtoItem.fabricacao); // Formatar a data de fabricação
+      const filtered = (produtos || []).filter((produtoItem) => {
+        const { nome, codigoCA, validadeCA, fabricacao, quantidade } = produtoItem;
+        const formattedValidadeCA = formatDate(validadeCA);
+        const formattedFabricacao = formatDate(fabricacao);
 
         return (
-          nome.includes(searchValue) ||
-          caNumero.includes(searchValue) ||
-          validadeCA.includes(searchValue) ||
-          fabricacao.includes(searchValue)
+          nome.toLowerCase().includes(searchValue) ||
+          codigoCA.toLowerCase().includes(searchValue) ||
+          formattedValidadeCA.includes(searchValue) ||
+          formattedFabricacao.includes(searchValue)||
+          quantidade.toLowerCase().includes(searchValue) 
         );
       });
 
       setFilteredProdutos(filtered);
     }
-  };
+  }
 
   const handleDeleteProduto = async (id) => {
     try {
       await api.delete(`/produtos/${id}`);
-      toast.success("Produto excluída com sucesso.");
+      toast.success('Produto excluído com sucesso.');
+      filterProdutos();
     } catch (error) {
-      toast.error("Erro ao excluir a Produto.");
+      console.error('Erro ao excluir o Produto:', error);
+      toast.error('Erro ao excluir o Produto.');
     }
+  };
+
+  const handleEditProduto = (produtoItem) => {
+    setSelectedProduto({ ...produtoItem });
+    setShowModal(true);
   };
 
   const handleSaveChanges = async () => {
+    if (!selectedProduto.nome || !selectedProduto.codigoCA) {
+      toast.error('Nome e C.A (numeração) são campos obrigatórios.');
+      return;
+    }
+
     try {
-      const response = await api.put(`/produto/${selectedProduto._id}`, {
+      const retorno = await api.put(`/produtos/${selectedProduto._id}`, {
         nome: selectedProduto.nome,
-        CAnumercao: selectedProduto.CAnumercao,
+        codigoCA: selectedProduto.codigoCA,
         validadeCA: selectedProduto.validadeCA,
         fabricacao: selectedProduto.fabricacao,
+        quantidade: selectedProduto.quantidade,
       });
-  
-      if (response.status === 200) {
-        toast.success("Alterações salvas com sucesso.");
-        produtos(); 
-        closeModal();
+
+      if (retorno.status === 200) {
+        toast.success('Alterações salvas com sucesso.');
+        setShowModal(false);
+        filterProdutos();
       } else {
-        toast.error("Erro ao salvar as alterações.");
+        toast.error('Erro ao salvar as alterações.');
       }
     } catch (error) {
-      console.error("Erro ao salvar as alterações:", error);
-      toast.error("Erro ao salvar as alterações.");
+      console.error('Erro ao salvar as alterações:', error);
+      toast.error('Erro ao salvar as alterações.');
     }
-  };
-  
-
-  const openModal = (produtoItem) => {
-    setSelectedProduto(produtoItem);
-    setShowModal(true);
   };
 
   const closeModal = () => {
     setSelectedProduto({
-      _id: "",
-      nome: "",
-      CAnumercao: "",
-      validadeCA: "",
-      fabricacao: "",
+      _id: '',
+      nome: '',
+      codigoCA: '',
+      validadeCA: '',
+      fabricacao: '',
+      quantidade: '',
     });
     setShowModal(false);
-  }
+  };
+
   return (
     <>
       <Table striped bordered hover>
         <thead>
           <tr>
             <th>Nome</th>
-            <th>C.A (numeração)</th>
+            <th>C.A</th>
             <th>Validade C.A</th>
             <th>Fabricação</th>
-            <th>Ações</th>
-            <th>Ações</th>
+            <th>Quantidade</th>
+            <th>Excluir</th>
+            <th>Editar</th>
           </tr>
         </thead>
         <tbody>
-          {produtos?.data?.docs.length > 0 ? 
-            produtos.data.docs.map((produtoItem) => (
-            <tr key={produtoItem._id}>
-              <td>{produtoItem.nome}</td>
-              <td>{produtoItem.CAnumercao}</td>
-              <td>{produtoItem.validadeCA}</td>
-              <td>{produtoItem.fabricacao}</td>
-              <td align="center">
-                <Button variant="danger" onClick={() => handleDeleteProduto(produtoItem._id)}>
-                  <FaTrash />
-                </Button>
-              </td>
-              <td align="center">
-                <Button variant="secondary" onClick={() => openModal(produtoItem)}>
-                  <FaSearch />
-                </Button>
-              </td>
+          {filteredProdutos?.length > 0 ? (
+            filteredProdutos.map((produtoItem) => (
+              <tr key={produtoItem._id}>
+                <td>{produtoItem.nome}</td>
+                <td>{produtoItem.codigoCA}</td>
+                <td>{formatDate(produtoItem.validadeCA)}</td>
+                <td>{formatDate(produtoItem.fabricacao)}</td>
+                <td>{produtoItem.quantidade}</td>
+                <td align="center">
+                  <Button
+                    variant="danger"
+                    onClick={() => handleDeleteProduto(produtoItem._id)}
+                  >
+                    <FaTrash />
+                  </Button>
+                </td>
+                <td align="center">
+                  <Button
+                    variant="secondary"
+                    onClick={() => handleEditProduto(produtoItem)}
+                  >
+                    <FaEdit  />
+                  </Button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="6">Nenhum produto encontrado.</td>
             </tr>
-          )): []}
+          )}
         </tbody>
       </Table>
       <ToastContainer autoClose={2000} position={toast.POSITION.BOTTOM_LEFT} />
-      <Modal show={showModal} onHide={closeModal}>  
+      <Modal show={showModal} onHide={closeModal}>
         <Modal.Header closeButton>
           <Modal.Title>Editar Produto</Modal.Title>
         </Modal.Header>
@@ -154,16 +178,16 @@ function ListaProdutos(props) {
                 }
               />
             </Form.Group>
-            <Form.Group controlId="formCAnumercao">
-              <Form.Label>C.A (numeração)</Form.Label>
+            <Form.Group controlId="formCodigoCA">
+              <Form.Label>C.A </Form.Label>
               <Form.Control
-                type="text"
+                type="number"
                 placeholder="C.A (numeração) do Produto"
-                value={selectedProduto.CAnumercao}
+                value={selectedProduto.codigoCA}
                 onChange={(e) =>
                   setSelectedProduto({
                     ...selectedProduto,
-                    CAnumercao: e.target.value,
+                    codigoCA: e.target.value,
                   })
                 }
               />
@@ -171,12 +195,12 @@ function ListaProdutos(props) {
             <Form.Group controlId="formValidadeCA">
               <Form.Label>Validade C.A</Form.Label>
               <Form.Control
-                type="date"
-                value={selectedProduto.validadeCA}
+                type="text"
+                value={formatDate(selectedProduto.validadeCA)}
                 onChange={(e) =>
                   setSelectedProduto({
                     ...selectedProduto,
-                    Fabricação: e.target.value,
+                    validadeCA: e.target.value,
                   })
                 }
               />
@@ -184,8 +208,8 @@ function ListaProdutos(props) {
             <Form.Group controlId="formFabricacao">
               <Form.Label>Fabricação</Form.Label>
               <Form.Control
-                type="date"
-                value={selectedProduto.fabricacao}
+                type="text"
+                value={formatDate(selectedProduto.fabricacao)}
                 onChange={(e) =>
                   setSelectedProduto({
                     ...selectedProduto,
@@ -194,6 +218,20 @@ function ListaProdutos(props) {
                 }
               />
             </Form.Group>
+            <Form.Group controlId="formQuantidade">
+              <Form.Label>Quantidade</Form.Label>
+              <Form.Control
+                type="number"
+                value={selectedProduto.quantidade}
+                onChange={(e) =>
+                  setSelectedProduto({
+                    ...selectedProduto,
+                    quantidade: e.target.value,
+                  })
+                }
+              />
+            </Form.Group>
+
           </Form>
         </Modal.Body>
         <Modal.Footer>

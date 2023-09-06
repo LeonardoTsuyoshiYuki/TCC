@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Colaborador = mongoose.model('User');
-
+const Funcao = mongoose.model('Funcao');
 module.exports = {
     async insertColaborador(req, resp) {
         try {
@@ -22,6 +22,7 @@ module.exports = {
             const options = {
                 page: pageNumber,
                 limit: pageSize,
+                populate: 'cargo' // Popula o campo 'cargo' com os detalhes da função
             };
 
             const { docs: colaborador, totalDocs: total } = await Colaborador.paginate({}, options);
@@ -30,6 +31,7 @@ module.exports = {
                 return res.status(404).json({ message: "Nenhum colaborador encontrado." });
             }
 
+            // Agora 'colaborador' contém as informações da função em vez do ID
             console.log("Colaboradores cadastrados:", colaborador);
             return res.json({ colaborador, total });
         } catch (error) {
@@ -46,11 +48,11 @@ module.exports = {
             let colaborador;
 
             if (isObjectId) {
-                colaborador = await Colaborador.findById(value);
+                colaborador = await Colaborador.findById(value).populate('cargo', 'nome');
             } else {
-                colaborador = await Colaborador.findOne({ nome: value }); // Busca pelo nome
+                colaborador = await Colaborador.findOne({ nome: value }).populate('cargo', 'nome');
                 if (!colaborador) {
-                    colaborador = await Colaborador.findOne({ matricula: value }); // Busca pela matrícula
+                    colaborador = await Colaborador.findOne({ matricula: value }).populate('cargo', 'nome');
                 }
             }
 
@@ -64,8 +66,7 @@ module.exports = {
             console.error("Erro ao buscar detalhes do colaborador:", error);
             return res.status(500).json({ message: "Erro interno ao buscar detalhes do colaborador." });
         }
-    }
-    ,
+    },
 
     async updateColaborador(req, res) {
         try {

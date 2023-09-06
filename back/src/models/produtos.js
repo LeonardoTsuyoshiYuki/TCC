@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const mongoosePaginacao = require('mongoose-paginate');
+const mongoosePaginate = require('mongoose-paginate');
 const moment = require('moment');
 
 const ProdutoSchema = new mongoose.Schema({
@@ -13,33 +13,23 @@ const ProdutoSchema = new mongoose.Schema({
     codigoCA: {
         type: Number,
         required: true,
-        unique: true,
-        length: 10,
+        unique: true, // Certifique-se de que o campo codigoCA seja único, não o _id
+        minlength: 10, // Isso deveria ser minlength, não length
     },
     validadeCA: {
-        type: String,
+        type: Date,
         required: true,
-        validate: {
-            validator: function (value) {
-                return /^\d{2}\/\d{2}\/\d{4}$/.test(value);
-            },
-            message: props => `${props.value} não está no formato dd/mm/yyyy.`
-        }
+    
     },
     fabricacao: {
-        type: String,
+        type: Date,
         required: true,
-        validate: {
-            validator: function (value) {
-                return /^\d{2}\/\d{2}\/\d{4}$/.test(value);
-            },
-            message: props => `${props.value} não está no formato dd/mm/yyyy.`
-        }
+        
     },
     quantidade: {
         type: Number,
         required: true,
-        length: 10,
+        minlength: 10, // Isso deveria ser maxlength, não length
     },
     registro: {
         type: Date,
@@ -47,7 +37,7 @@ const ProdutoSchema = new mongoose.Schema({
     }
 });
 
-ProdutoSchema.plugin(mongoosePaginacao);
+ProdutoSchema.plugin(mongoosePaginate);
 
 // Antes de salvar, formate as datas no formato DD/MM/YYYY
 ProdutoSchema.pre('save', function(next) {
@@ -60,4 +50,6 @@ ProdutoSchema.pre('save', function(next) {
     next();
 });
 
-mongoose.model('Produto', ProdutoSchema);
+const Produto = mongoose.model('Produto', ProdutoSchema);
+
+module.exports = Produto;

@@ -2,25 +2,29 @@ import React, { useState, useEffect } from 'react';
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import { FaTrash, FaSearch } from 'react-icons/fa';
+import { FaTrash, FaSearch, FaEdit } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import api from '../../../services/services';
 
 function ListagemColaborador(props) {
-  const { dataset, AtualizarTabela, searchValue } = props;
+  const { dataset, AtualizarTabela, searchValue, datasetFuncao } = props;
 
   const [showModal, setShowModal] = useState(false);
   const [selectedColaborador, setSelectedColaborador] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCargoId, setSelectedCargoId] = useState('');
+
 
   const openModal = (colaborador) => {
     setSelectedColaborador(colaborador);
+    setSelectedCargoId(colaborador.cargo._id)
     setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
   };
+
 
   const handleDeleteColaborador = async (Item) => {
     try {
@@ -33,17 +37,19 @@ function ListagemColaborador(props) {
     }
   };
 
+
   const handleSaveChanges = async () => {
     try {
-      await api.put(`/colaboradores/${selectedColaborador._id}`, selectedColaborador);
+      const updatedColaborador = { ...selectedColaborador, cargo: selectedCargoId };
+      await api.put(`/colaboradores/${selectedColaborador._id}`, updatedColaborador);
       setShowModal(false);
+      AtualizarTabela(true);
       toast.success('Alterações salvas com sucesso.');
     } catch (error) {
       console.error('Erro ao salvar alterações:', error);
       toast.error('Erro ao salvar alterações.');
     }
   };
-
   useEffect(() => {
     setSearchTerm(searchValue);
   }, [searchValue]);
@@ -53,6 +59,8 @@ function ListagemColaborador(props) {
     (typeof item.matricula === 'number' && item.matricula.toString().includes(searchTerm))
   );
 
+
+  
   return (
     <>
       <Table striped bordered hover>
@@ -60,8 +68,9 @@ function ListagemColaborador(props) {
           <tr>
             <th>Nome</th>
             <th>Matrícula</th>
-            <th>Ações</th>
-            <th>Ações</th>
+            <th>Cargo</th>
+            <th>Excluir</th>
+            <th>Editar</th>
           </tr>
         </thead>
         <tbody>
@@ -70,6 +79,7 @@ function ListagemColaborador(props) {
               <tr key={Item._id}>
                 <td>{Item.nome || '-'}</td>
                 <td>{Item.matricula || '-'}</td>
+                <td>{Item.cargo.nome || '-'}</td>
                 <td align="center">
                   <Button
                     variant="danger"
@@ -83,16 +93,16 @@ function ListagemColaborador(props) {
                     variant="secondary"
                     onClick={() => openModal(Item)}
                   >
-                    <FaSearch />
+                    <FaEdit />
                   </Button>
                 </td>
               </tr>
             ))
-          ) : (
+          ) : [(
             <tr>
               <td colSpan="4">Nenhum colaborador encontrado.</td>
             </tr>
-          )}
+          )]}
         </tbody>
       </Table>
       <ToastContainer autoClose={2000} position={toast.POSITION.BOTTOM_LEFT} />
@@ -125,13 +135,19 @@ function ListagemColaborador(props) {
               </div>
               <div className="mb-3">
                 <label htmlFor="colaboradorCargo" className="form-label">Cargo</label>
-                <input
-                  type="text"
-                  className="form-control"
+                <select
+                  className="form-select"
                   id="colaboradorCargo"
-                  value={selectedColaborador.cargo || ''}
-                  onChange={(e) => setSelectedColaborador(prevState => ({ ...prevState, cargo: e.target.value }))}
-                />
+                  value={selectedCargoId}
+                  onChange={(e) => setSelectedCargoId(e.target.value)}
+                >
+                  <option value="">Selecione um cargo</option>
+                  {datasetFuncao?.map((funcao) => (
+                    <option key={funcao._id} value={funcao._id}>
+                      {funcao.nome}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="mb-3">
                 <label htmlFor="colaboradorTelefone" className="form-label">Telefone</label>

@@ -12,23 +12,38 @@ import GlobalStyle from '../../styles/global';
 
 function Colaborador(props) {
   const [searchValueColaborador, setSearchValueColaborador] = useState('');
-  const [dataset, setDataset] = useState([]);
+  const [dataset, setDataset] = useState();
+  const [datasetFuncao, setDatasetFuncao] = useState();
   const [atualizarTabela, setAtualizarTabela] = useState(false);
 
   useEffect(() => {
     BuscaColaboradores();
+    BuscaFuncao()
   }, [atualizarTabela]);
 
   async function BuscaColaboradores() {
     try {
       const retorno = await api.get('/colaboradores');
       setDataset(retorno);
-      setAtualizarTabela(false); // Fix: setAtualizarTabela should be set to false
+      setAtualizarTabela(false);
     } catch (error) {
       console.error('Erro ao buscar colaboradores:', error);
       toast.error('Erro ao buscar colaboradores.');
     }
   }
+
+  async function BuscaFuncao() {
+    try {
+      const retorno = await api.get('/funcao');
+
+
+      setDatasetFuncao(retorno.data.docs);
+    } catch (error) {
+      console.error('Erro ao buscar colaboradores:', error);
+      toast.error('Erro ao buscar colaboradores.');
+    }
+  }
+
 
   return (
     <>
@@ -59,6 +74,7 @@ function Colaborador(props) {
                 dataset={dataset}
                 AtualizarTabela={setAtualizarTabela}
                 searchValue={searchValueColaborador}
+                datasetFuncao={datasetFuncao}
               />
             </Tab>
           </Tabs>

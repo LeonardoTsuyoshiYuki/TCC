@@ -1,80 +1,73 @@
 import React, { useState, useEffect } from 'react';
-import { Tab, Tabs, TabContainer, Container, Form, Stack } from 'react-bootstrap';
+import { Tabs, Tab, Container, Form, Button, Stack } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Header from '../../components/Header';
-import CadastroProdutos from './CadastroProdutos'; // Importe o componente CadastroProduto
-import ListaProdutos from './ListaProdutos'; // Importe o componente ListaProduto
+import CadastroProdutos from './CadastroProdutos';
+import ListaProdutos from './ListaProdutos';
 import api from '../../services/services';
 import GlobalStyle from '../../styles/global';
 
-function Produtos(props) {
+function Produtos() {
   const [searchValueProdutos, setSearchValueProdutos] = useState('');
-  const [produtos, setProsutos] = useState();
-
+  const [produtos, setProdutos] = useState();
+ 
   useEffect(() => {
-    BuscaProduto();
-  }, []);
+    Buscadados();
+  }, [produtos]);
 
-  async function BuscaProduto (){
+  async function Buscadados() {
     try {
-      const retorno = await api.get('/produtos');
-      // console.log("**********retornoProdutos", retorno)
-      setProsutos(retorno.data.docs)
+      const response = await api.get('/produtos');
+      setProdutos(response.data.docs);
     } catch (error) {
       console.error('Erro ao buscar os dados de Produtos:', error);
+      toast.error('Erro ao buscar os dados de Produtos.');
     }
-  };
+  }
 
-  async function handleSearchFuncao(){
+  async function handleSearchFunction() {
     try {
-      const retorno = await api.get('/produtos', {
+      const response = await api.get('/produtos', {
         params: {
-          search: searchValueProdutos // Envie o valor de busca para o backend
-        }
+          search: searchValueProdutos,
+        },
       });
-      setProsutos(retorno.data.docs); // Atualize o estado com os resultados da busca
+      setProdutos(response.data.docs);
     } catch (error) {
       console.error('Erro ao buscar o Produto:', error);
       toast.error('Erro ao buscar o Produto.');
     }
-  };
+  }
 
   return (
     <>
-     <Header />
-
-       <Container>
+      <Header />
+      <Container>
         <h1 style={{ textAlign: 'center', color: 'white' }}>PRODUTOS</h1>
         <br />
-        <TabContainer>
-          <Tabs
-            defaultActiveKey="listagem"
-            id="uncontrolled-tab-example"
-            className="mb-3"
-            fill
-          >
-            <Tab eventKey="listagem" title="Listagem">
-              <Stack direction="horizontal" gap={3}>
-                <Form.Control
-                  type="search"
-                  placeholder="Filtrar por Nome ou C.A"
-                  value={searchValueProdutos}
-                  onChange={(e) => setSearchValueProdutos(e.target.value)}
-                />
-              </Stack>
-              <br/>
-              <ListaProdutos
-                produtos={produtos}
-                searchValueProdutos={searchValueProdutos}
-                setProsutos={setProsutos}
+        <Tabs defaultActiveKey="listagem" id="uncontrolled-tab-example" className="mb-3" fill>
+          <Tab eventKey="listagem" title="Listagem">
+            <Stack direction="horizontal" gap={3}>
+              <Form.Control
+                type="search"
+                placeholder="Filtrar por Nome ou C.A"
+                value={searchValueProdutos}
+                onChange={(e) => setSearchValueProdutos(e.target.value)}
               />
-            </Tab>
-            <Tab eventKey="profile" title="Cadastro">
-              {/* <CadastroProdutos /> */}
-            </Tab>
-          </Tabs>
-        </TabContainer>
+              <Button variant="primary" onClick={handleSearchFunction}>Buscar</Button>
+            </Stack>
+            <br />
+            <ListaProdutos
+              produtos={produtos}
+              searchValueProdutos={searchValueProdutos}
+              Buscadados={Buscadados}
+            />
+          </Tab>
+          <Tab eventKey="profile" title="Cadastro">
+            <CadastroProdutos produtos={produtos} Buscadados={Buscadados} />
+          </Tab>
+        </Tabs>
       </Container>
       <ToastContainer autoClose={2000} position={toast.POSITION.BOTTOM_LEFT} />
       <GlobalStyle />

@@ -23,10 +23,10 @@ const UserSchema = new mongoose.Schema({
         maxlength: 200,
 
     },
-    cargo:{
-        type: String,
-        require: true,
-        uppercase: true,
+    cargo: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Funcao',
+        // Comentário: Referência à função do usuário
     },
     telefone:{
         type: Number,

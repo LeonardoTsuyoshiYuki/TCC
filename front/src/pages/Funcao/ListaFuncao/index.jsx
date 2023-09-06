@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaTrash, FaSearch } from "react-icons/fa";
+import { FaTrash, FaSearch, FaEdit  } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import { Table, Button, Modal, Form  } from "react-bootstrap";
 import 'react-toastify/dist/ReactToastify.css';
@@ -91,8 +91,8 @@ function ListaFuncao(props) {
           <tr>
             <th>Função</th>
             <th>Cargo</th>
-            <th>Ações</th>
-            <th>Ações</th>
+            <th>Excluir</th>
+            <th>Editar</th>
           </tr>
         </thead>
         <tbody>
@@ -107,7 +107,7 @@ function ListaFuncao(props) {
               </td>
               <td align="center">
                 <Button variant="secondary" onClick={() => openModal(funcaoItem)}>
-                  <FaSearch />
+                  <FaEdit  />
                 </Button>
               </td>
             </tr>
