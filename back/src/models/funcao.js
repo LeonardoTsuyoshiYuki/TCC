@@ -17,8 +17,10 @@ const FuncaoSchema = new mongoose.Schema({
     },
     registro: {
         type: Date,
+        unique: true,
         default: Date.now
     }
+    
 })
 
 

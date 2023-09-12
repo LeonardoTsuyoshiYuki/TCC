@@ -28,6 +28,11 @@ const UserSchema = new mongoose.Schema({
         ref: 'Funcao',
         // Comentário: Referência à função do usuário
     },
+    listagem: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ListaEpi',
+        // Comentário: Referência à função do usuário
+    },
     telefone:{
         type: Number,
         require: true, 

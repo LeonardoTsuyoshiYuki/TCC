@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Colaborador = mongoose.model('User');
-const Funcao = mongoose.model('Funcao');
+
 module.exports = {
     async insertColaborador(req, resp) {
         try {
@@ -22,7 +22,7 @@ module.exports = {
             const options = {
                 page: pageNumber,
                 limit: pageSize,
-                populate: 'cargo' // Popula o campo 'cargo' com os detalhes da função
+                populate: ['cargo', 'listagem']
             };
 
             const { docs: colaborador, totalDocs: total } = await Colaborador.paginate({}, options);
@@ -31,7 +31,6 @@ module.exports = {
                 return res.status(404).json({ message: "Nenhum colaborador encontrado." });
             }
 
-            // Agora 'colaborador' contém as informações da função em vez do ID
             console.log("Colaboradores cadastrados:", colaborador);
             return res.json({ colaborador, total });
         } catch (error) {
@@ -42,25 +41,19 @@ module.exports = {
 
     async details(req, res) {
         try {
-            const value = req.params.value; // Parâmetro para o valor a ser buscado
-            const isObjectId = mongoose.isValidObjectId(value);
-
-            let colaborador;
-
-            if (isObjectId) {
-                colaborador = await Colaborador.findById(value).populate('cargo', 'nome');
-            } else {
-                colaborador = await Colaborador.findOne({ nome: value }).populate('cargo', 'nome');
-                if (!colaborador) {
-                    colaborador = await Colaborador.findOne({ matricula: value }).populate('cargo', 'nome');
-                }
-            }
-
+            const matricula = req.params.value;
+    
+            const colaborador = await Colaborador.findOne({ 
+                matricula: new RegExp(`^${matricula}$`, 'i'), // Filtro exato na matrícula
+                departamento: "RH" // Filtro para o departamento
+            }).populate('cargo listagem');
+    
             if (!colaborador) {
-                return res.status(404).json({ message: "Colaborador não encontrado." });
+                console.log(`Colaborador com matrícula '${matricula}' não encontrado ou não pertence ao departamento 'RH'.`);
+                return res.status(404).json({ message: "Colaborador não encontrado ou não pertence ao departamento 'RH'." });
             }
-
-            console.log(`Detalhes do colaborador:`, colaborador);
+    
+            console.log(`Detalhes do colaborador com matrícula '${matricula}':`, colaborador);
             return res.json(colaborador);
         } catch (error) {
             console.error("Erro ao buscar detalhes do colaborador:", error);

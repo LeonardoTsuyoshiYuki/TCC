@@ -7,6 +7,8 @@ import useAuth from "../hooks/useAuth"
 import Colaborador from "../pages/Colaborador"
 import Funcao from "../pages/Funcao"
 import Produtos from "../pages/Produtos"
+import Relatorio from "../pages/Relatorio"
+import ListaEPI from "../pages/Relatorio/ListagemDeEPIs"
 
 function Private({ Item }) {
     const { signed } = useAuth();
@@ -28,6 +30,10 @@ function RoutesApp(){
                     <Route exact path="/funcao" element={<Private Item={Funcao}/>} />
                     <Route path="/" element={<SignIn />} />
                     <Route exact path="/produtos" element={<Private Item={Produtos}/>} />
+                    <Route path="/" element={<SignIn />} />
+                    <Route exact path="/relatorio" element={<Private Item={Relatorio}/>} />
+                    <Route path="/" element={<SignIn />} />
+                    <Route exact path="/listaepi" element={<Private Item={ListaEPI}/>} />
                     <Route path="/" element={<SignIn />} />
                 </Routes>
             </Fragment>

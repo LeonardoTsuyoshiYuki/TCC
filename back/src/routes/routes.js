@@ -4,7 +4,7 @@ const routes=express.Router()
 const colaboradorController=require('../controllers/colaboradorControllers')
 const funcaoController=require('../controllers/funcaoController')
 const produtosController=require('../controllers/produtosController')
-
+const listagemEPIController=require('../controllers/listagemEPIControlle')
 
 
 
@@ -38,6 +38,13 @@ routes.get('/produtos', produtosController.listProduto)
 routes.post('/produtos', produtosController.insertProduto)
 routes.put('/produtos/:id', produtosController.updateProduto)
 routes.delete('/produtos/:id', produtosController.deleteProduto)
+//Rotas de Listagem de EPIs
+routes.get('/listaEpi/:id', listagemEPIController.details)
+routes.get('/listaEpi', listagemEPIController.listListaEpi)
+routes.post('/listaEpi', listagemEPIController.insertListaEpi)
+routes.put('/listaEpi/:id', listagemEPIController.updateListaEpi)
+routes.delete('/listaEpi/:id', listagemEPIController.deleteListaEpi)
+
 
 
 

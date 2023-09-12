@@ -3,7 +3,8 @@ import * as C from "./styles";
 import useAuth from "../../hooks/useAuth";
 import { IoBuildOutline, IoArrowUndoOutline, IoHomeOutline } from "react-icons/io5";
 import { CiUser } from "react-icons/ci";
-import { FaTimes, FaBox } from "react-icons/fa"; // Adicionado o ícone FaBox
+import { FaTimes, FaBox } from "react-icons/fa"; 
+import { FiFileText } from 'react-icons/fi';
 
 import { useNavigate } from "react-router-dom";
 
@@ -21,6 +22,9 @@ function SideBar({ active, Text }) {
 
     function handleClickProdutos() {
         navigate("/produtos") 
+    }
+    function handleClickRelatorio() {
+        navigate("/relatorio") 
     }
 
     function closeSideBar() {
@@ -49,6 +53,10 @@ function SideBar({ active, Text }) {
                 <C.ContainerIcon onClick={handleClickProdutos}>
                     <FaBox />
                     Produtos
+                </C.ContainerIcon>
+                <C.ContainerIcon onClick={handleClickRelatorio}>
+                    <FiFileText />
+                    Relatorio
                 </C.ContainerIcon>
 
                 <C.ContainerIcon 

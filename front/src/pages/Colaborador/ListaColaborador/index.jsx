@@ -15,7 +15,7 @@ function ListagemColaborador(props) {
   const [selectedCargoId, setSelectedCargoId] = useState('');
 
 
-  const openModal = (colaborador) => {
+  async function  openModal(colaborador){
     setSelectedColaborador(colaborador);
     setSelectedCargoId(colaborador.cargo._id)
     setShowModal(true);
@@ -26,7 +26,7 @@ function ListagemColaborador(props) {
   };
 
 
-  const handleDeleteColaborador = async (Item) => {
+  async function  handleDeleteColaborador (Item){
     try {
       await api.delete(`/colaboradores/${Item._id}`);
       AtualizarTabela(true);
@@ -38,7 +38,7 @@ function ListagemColaborador(props) {
   };
 
 
-  const handleSaveChanges = async () => {
+  async function handleSaveChanges(){
     try {
       const updatedColaborador = { ...selectedColaborador, cargo: selectedCargoId };
       await api.put(`/colaboradores/${selectedColaborador._id}`, updatedColaborador);
@@ -52,7 +52,7 @@ function ListagemColaborador(props) {
   };
   useEffect(() => {
     setSearchTerm(searchValue);
-  }, [searchValue]);
+  }, [searchValue, datasetFuncao]);
 
   const filteredColaboradores = dataset?.data?.colaborador?.filter((item) =>
     (item.nome && item.nome.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -77,9 +77,9 @@ function ListagemColaborador(props) {
           {filteredColaboradores?.length > 0 ? (
             filteredColaboradores.map((Item) => (
               <tr key={Item._id}>
-                <td>{Item.nome || '-'}</td>
-                <td>{Item.matricula || '-'}</td>
-                <td>{Item.cargo.nome || '-'}</td>
+                <td>{Item.nome ? Item.nome : ''}</td>
+                <td>{Item.matricula ? Item.matricula : ''}</td>
+                <td>{Item.cargo.nome === null ? 'Sem cargo' : Item.cargo.nome}</td>
                 <td align="center">
                   <Button
                     variant="danger"
@@ -98,11 +98,7 @@ function ListagemColaborador(props) {
                 </td>
               </tr>
             ))
-          ) : [(
-            <tr>
-              <td colSpan="4">Nenhum colaborador encontrado.</td>
-            </tr>
-          )]}
+          ) : []}
         </tbody>
       </Table>
       <ToastContainer autoClose={2000} position={toast.POSITION.BOTTOM_LEFT} />
@@ -138,7 +134,7 @@ function ListagemColaborador(props) {
                 <select
                   className="form-select"
                   id="colaboradorCargo"
-                  value={selectedCargoId}
+                  value={selectedCargoId === null ? "Sem Cargo" : selectedCargoId}
                   onChange={(e) => setSelectedCargoId(e.target.value)}
                 >
                   <option value="">Selecione um cargo</option>
