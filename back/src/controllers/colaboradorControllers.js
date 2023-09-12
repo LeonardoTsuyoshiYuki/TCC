@@ -41,19 +41,24 @@ module.exports = {
 
     async details(req, res) {
         try {
-            const matricula = req.params.value;
-    
-            const colaborador = await Colaborador.findOne({ 
-                matricula: new RegExp(`^${matricula}$`, 'i'), // Filtro exato na matrícula
-                departamento: "RH" // Filtro para o departamento
-            }).populate('cargo listagem');
-    
-            if (!colaborador) {
-                console.log(`Colaborador com matrícula '${matricula}' não encontrado ou não pertence ao departamento 'RH'.`);
-                return res.status(404).json({ message: "Colaborador não encontrado ou não pertence ao departamento 'RH'." });
+            const value = req.params.value; // Parâmetro para o valor a ser buscado
+            const isObjectId = mongoose.isValidObjectId(value);
+
+            let query = {};
+
+            if (isObjectId) {
+                query = { _id: value };
+            } else {
+                query = { $or: [{ nome: value }, { matricula: value }] };
             }
-    
-            console.log(`Detalhes do colaborador com matrícula '${matricula}':`, colaborador);
+
+            const colaborador = await Colaborador.findOne(query).populate('cargo listagem');
+
+            if (!colaborador) {
+                return res.status(404).json({ message: "Colaborador não encontrado." });
+            }
+
+            console.log(`Detalhes do colaborador:`, colaborador);
             return res.json(colaborador);
         } catch (error) {
             console.error("Erro ao buscar detalhes do colaborador:", error);
