@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Table from 'react-bootstrap/Table';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import { FaTrash, FaSearch, FaEdit } from 'react-icons/fa';
+import { FaTrash, FaEdit } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import api from '../../../services/services';
 
@@ -10,35 +10,47 @@ function ListagemColaborador(props) {
   const { dataset, AtualizarTabela, searchValue, datasetFuncao } = props;
 
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [selectedColaborador, setSelectedColaborador] = useState({});
-  const [searchTerm, setSearchTerm] = useState('');
   const [selectedCargoId, setSelectedCargoId] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
-
-  async function  openModal(colaborador){
+  async function openModal(colaborador) {
     setSelectedColaborador(colaborador);
-    setSelectedCargoId(colaborador.cargo._id)
+    setSelectedCargoId(colaborador.cargo._id);
     setShowModal(true);
-  };
+  }
 
   const closeModal = () => {
     setShowModal(false);
-  };
+  }
 
+  async function handleDeleteColaborador(Item) {
+    setShowDeleteConfirmation(true);
+  }
 
-  async function  handleDeleteColaborador (Item){
+  async function confirmDeleteColaborador () {
     try {
-      await api.delete(`/colaboradores/${Item._id}`);
+      if (!selectedColaborador || !selectedColaborador._id) {
+        console.error('ID do colaborador não está definido.');
+        return;
+      }
+  
+      await api.delete(`/colaboradores/${selectedColaborador._id}`);
       AtualizarTabela(true);
       toast.success('Colaborador removido com sucesso.');
+      hideDeleteConfirmationModal();
     } catch (error) {
       console.error('Erro ao remover colaborador:', error);
       toast.error('Erro ao remover colaborador.');
     }
-  };
+  }
 
+  const hideDeleteConfirmationModal = () => {
+    setShowDeleteConfirmation(false);
+  }
 
-  async function handleSaveChanges(){
+  async function handleSaveChanges() {
     try {
       const updatedColaborador = { ...selectedColaborador, cargo: selectedCargoId };
       await api.put(`/colaboradores/${selectedColaborador._id}`, updatedColaborador);
@@ -49,7 +61,8 @@ function ListagemColaborador(props) {
       console.error('Erro ao salvar alterações:', error);
       toast.error('Erro ao salvar alterações.');
     }
-  };
+  }
+
   useEffect(() => {
     setSearchTerm(searchValue);
   }, [searchValue, datasetFuncao]);
@@ -59,8 +72,6 @@ function ListagemColaborador(props) {
     (typeof item.matricula === 'number' && item.matricula.toString().includes(searchTerm))
   );
 
-
-  
   return (
     <>
       <Table striped bordered hover>
@@ -87,6 +98,7 @@ function ListagemColaborador(props) {
                   >
                     <FaTrash />
                   </Button>
+
                 </td>
                 <td align="center">
                   <Button
@@ -208,6 +220,22 @@ function ListagemColaborador(props) {
           </Button>
           <Button variant="primary" onClick={handleSaveChanges}>
             Salvar Alterações
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal show={showDeleteConfirmation} onHide={hideDeleteConfirmationModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirmar Exclusão</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Tem certeza de que deseja excluir o colaborador "{selectedColaborador.nome}"?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={hideDeleteConfirmationModal}>
+            Cancelar
+          </Button>
+          <Button variant="danger" onClick={confirmDeleteColaborador}>
+            Excluir
           </Button>
         </Modal.Footer>
       </Modal>

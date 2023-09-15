@@ -26,12 +26,14 @@ const UserSchema = new mongoose.Schema({
     cargo: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Funcao',
-        // Comentário: Referência à função do usuário
+    },
+    inspecao: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Inspecoes',
     },
     listagem: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'ListaEpi',
-        // Comentário: Referência à função do usuário
     },
     telefone:{
         type: Number,

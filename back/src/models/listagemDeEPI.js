@@ -7,23 +7,23 @@ const ListaEpiSchema = new mongoose.Schema({
     produto: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Produto',
-        required: true,
+        
     },
     quantidade: {
         type: Number,
-        required: true,
+        
         length: 10,
     },
     entrega: {
         type: Date,
-        required: true,
+        
     },
     devolucao: {
         type: Date,
     },
     vistoEntrega: {
         type: String,
-        require: true,
+    
         uppercase: true,
         minlength: 3,
         maxlength: 200,

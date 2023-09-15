@@ -13,8 +13,8 @@ const ProdutoSchema = new mongoose.Schema({
     codigoCA: {
         type: Number,
         required: true,
-        unique: true, // Certifique-se de que o campo codigoCA seja único, não o _id
-        minlength: 10, // Isso deveria ser minlength, não length
+        unique: true, 
+        minlength: 10, 
     },
     validadeCA: {
         type: Date,

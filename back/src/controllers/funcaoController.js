@@ -34,8 +34,6 @@ module.exports = {
             if (!funcoesPaginadas) {
                 return resp.status(404).json({ message: "Nenhum Funcao encontrado." });
             }
-
-            console.log("Funcaoes cadastrados:", funcoesPaginadas);
             return resp.json(funcoesPaginadas);
         } catch (error) {
             console.error("Erro ao listar Funcoes:", error);

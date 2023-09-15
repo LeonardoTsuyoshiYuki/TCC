@@ -5,7 +5,8 @@ const colaboradorController=require('../controllers/colaboradorControllers')
 const funcaoController=require('../controllers/funcaoController')
 const produtosController=require('../controllers/produtosController')
 const listagemEPIController=require('../controllers/listagemEPIControlle')
-
+const PerguntaController=require('../controllers/perguntaControlle')
+const InspecoesController=require('../controllers/inspecoesController')
 
 
 
@@ -21,7 +22,7 @@ const listagemEPIController=require('../controllers/listagemEPIControlle')
 
 
 //Rotas de Colaborador
-routes.get('/colaboradores/:id', colaboradorController.details)
+// routes.get('/colaboradores/?', colaboradorController.details)
 routes.get('/colaboradores', colaboradorController.listColaborador)
 routes.post('/colaboradores', colaboradorController.insertColaborador)
 routes.put('/colaboradores/:id', colaboradorController.updateColaborador)
@@ -44,6 +45,19 @@ routes.get('/listaEpi', listagemEPIController.listListaEpi)
 routes.post('/listaEpi', listagemEPIController.insertListaEpi)
 routes.put('/listaEpi/:id', listagemEPIController.updateListaEpi)
 routes.delete('/listaEpi/:id', listagemEPIController.deleteListaEpi)
+
+// Rotas para Pergunta
+routes.get('/pergunta', PerguntaController.listPergunta);
+routes.post('/pergunta', PerguntaController.insertPergunta);
+routes.put('/pergunta/:id', PerguntaController.updatePergunta);
+routes.delete('/pergunta/:id', PerguntaController.deletePergunta);
+
+// Rotas para Inspecoes
+routes.get('/inspecao', InspecoesController.listInspecao);
+routes.get('/inspecao/:id', InspecoesController.details);
+routes.post('/inspecao', InspecoesController.insertInspecao);
+routes.put('/inspecao/:id', InspecoesController.updateInspecao);
+routes.delete('/inspecao/:id', InspecoesController.deleteInspecao);
 
 
 

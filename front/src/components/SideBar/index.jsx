@@ -3,7 +3,7 @@ import * as C from "./styles";
 import useAuth from "../../hooks/useAuth";
 import { IoBuildOutline, IoArrowUndoOutline, IoHomeOutline } from "react-icons/io5";
 import { CiUser } from "react-icons/ci";
-import { FaTimes, FaBox } from "react-icons/fa"; 
+import { FaTimes, FaBox, FaClipboardCheck  } from "react-icons/fa"; 
 import { FiFileText } from 'react-icons/fi';
 
 import { useNavigate } from "react-router-dom";
@@ -26,6 +26,9 @@ function SideBar({ active, Text }) {
     function handleClickRelatorio() {
         navigate("/relatorio") 
     }
+    function handleClickInspecoesCadastro() {
+        navigate("/inspecoesCadastro") 
+    }
 
     function closeSideBar() {
         active(false)
@@ -43,6 +46,10 @@ function SideBar({ active, Text }) {
                 <C.ContainerIcon onClick={handleClickColaborador}>
                     <CiUser />
                     Colaborador
+                </C.ContainerIcon>
+                <C.ContainerIcon onClick={handleClickInspecoesCadastro}>
+                    <FaClipboardCheck />
+                    Inspeções
                 </C.ContainerIcon>
 
                 <C.ContainerIcon onClick={handleClickFuncao}>

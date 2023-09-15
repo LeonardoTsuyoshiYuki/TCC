@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { FaTrash, FaSearch, FaEdit  } from "react-icons/fa";
+import { FaTrash, FaSearch, FaEdit } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
-import { Table, Button, Modal, Form  } from "react-bootstrap";
+import { Table, Button, Modal, Form } from "react-bootstrap";
 import 'react-toastify/dist/ReactToastify.css';
 import api from "../../../services/services";
 
@@ -9,11 +9,14 @@ function ListaFuncao(props) {
   const { funcoes, searchValue, setFuncoes } = props
   const [filteredFuncoes, setFilteredFuncoes] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [selectedFunction, setSelectedFunction] = useState({
     _id: "",
     nome: "",
     tipo: "",
   });
+  const [deletingFunctionId, setDeletingFunctionId] = useState('');
+  const [deletingFunctionName, setDeletingFunctionName] = useState('');
 
   useEffect(() => {
     filterFuncoes();
@@ -31,14 +34,27 @@ function ListaFuncao(props) {
     }
   };
 
-  const handleDeleteFuncao = async (id) => {
+  const handleDeleteFuncao = async (id, nome) => {
+    setDeletingFunctionId(id);
+    setDeletingFunctionName(nome);
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDeleteFuncao = async () => {
     try {
-      await api.delete(`/funcao/${id}`);
-      toast.success("Função excluída com sucesso.");
+      await api.delete(`/funcao/${deletingFunctionId}`);
+      toast.success(`Função "${deletingFunctionName}" excluída com sucesso.`);
       fetchFuncoes();
+      hideDeleteConfirmModal();
     } catch (error) {
       toast.error("Erro ao excluir a Função.");
     }
+  };
+
+  const hideDeleteConfirmModal = () => {
+    setDeletingFunctionId('');
+    setDeletingFunctionName('');
+    setShowDeleteConfirmation(false);
   };
 
   const openModal = (funcaoItem) => {
@@ -96,22 +112,22 @@ function ListaFuncao(props) {
           </tr>
         </thead>
         <tbody>
-          {filteredFuncoes? filteredFuncoes.map((funcaoItem) => (
+          {filteredFuncoes ? filteredFuncoes.map((funcaoItem) => (
             <tr key={funcaoItem._id}>
               <td>{funcaoItem.nome}</td>
               <td>{funcaoItem.tipo}</td>
               <td align="center">
-                <Button variant="danger" onClick={() => handleDeleteFuncao(funcaoItem._id)}>
+                <Button variant="danger" onClick={() => handleDeleteFuncao(funcaoItem._id, funcaoItem.nome)}>
                   <FaTrash />
                 </Button>
               </td>
               <td align="center">
                 <Button variant="secondary" onClick={() => openModal(funcaoItem)}>
-                  <FaEdit  />
+                  <FaEdit />
                 </Button>
               </td>
             </tr>
-          )): []}
+          )) : []}
         </tbody>
       </Table>
       <ToastContainer autoClose={2000} position={toast.POSITION.BOTTOM_LEFT} />
@@ -157,6 +173,22 @@ function ListaFuncao(props) {
           </Button>
           <Button variant="primary" onClick={handleSaveChanges}>
             Salvar Alterações
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal show={showDeleteConfirmation} onHide={hideDeleteConfirmModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirmar Exclusão</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Tem certeza de que deseja excluir a função "{deletingFunctionName}"?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={hideDeleteConfirmModal}>
+            Cancelar
+          </Button>
+          <Button variant="danger" onClick={confirmDeleteFuncao}>
+            Excluir
           </Button>
         </Modal.Footer>
       </Modal>

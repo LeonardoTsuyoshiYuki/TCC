@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Form, Modal, Table } from 'react-bootstrap';
-import { FaTrash, FaEdit  } from 'react-icons/fa';
+import { FaTrash, FaEdit } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import api from '../../../services/services';
@@ -10,6 +10,7 @@ function ListaProdutos(props) {
 
   const [filteredProdutos, setFilteredProdutos] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [selectedProduto, setSelectedProduto] = useState({
     _id: '',
     nome: '',
@@ -18,10 +19,11 @@ function ListaProdutos(props) {
     fabricacao: '',
     quantidade: '',
   });
+  const [deletingProdutoId, setDeletingProdutoId] = useState('');
+  const [deletingProdutoName, setDeletingProdutoName] = useState('');
 
   useEffect(() => {
     filterProdutos();
-
   }, [produtos, searchValueProdutos]);
 
   function formatDate(date) {
@@ -44,8 +46,8 @@ function ListaProdutos(props) {
           nome.toLowerCase().includes(searchValue) ||
           codigoCA.toLowerCase().includes(searchValue) ||
           formattedValidadeCA.includes(searchValue) ||
-          formattedFabricacao.includes(searchValue)||
-          quantidade.toLowerCase().includes(searchValue) 
+          formattedFabricacao.includes(searchValue) ||
+          quantidade.toLowerCase().includes(searchValue)
         );
       });
 
@@ -53,15 +55,28 @@ function ListaProdutos(props) {
     }
   }
 
-  const handleDeleteProduto = async (id) => {
+  const handleDeleteProduto = async (id, nome) => {
+    setDeletingProdutoId(id);
+    setDeletingProdutoName(nome);
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDeleteProduto = async () => {
     try {
-      await api.delete(`/produtos/${id}`);
-      toast.success('Produto excluído com sucesso.');
+      await api.delete(`/produtos/${deletingProdutoId}`);
+      toast.success(`Produto "${deletingProdutoName}" excluído com sucesso.`);
       filterProdutos();
+      hideDeleteConfirmModal();
     } catch (error) {
       console.error('Erro ao excluir o Produto:', error);
       toast.error('Erro ao excluir o Produto.');
     }
+  };
+
+  const hideDeleteConfirmModal = () => {
+    setDeletingProdutoId('');
+    setDeletingProdutoName('');
+    setShowDeleteConfirmation(false);
   };
 
   const handleEditProduto = (produtoItem) => {
@@ -135,7 +150,9 @@ function ListaProdutos(props) {
                 <td align="center">
                   <Button
                     variant="danger"
-                    onClick={() => handleDeleteProduto(produtoItem._id)}
+                    onClick={() =>
+                      handleDeleteProduto(produtoItem._id, produtoItem.nome)
+                    }
                   >
                     <FaTrash />
                   </Button>
@@ -145,7 +162,7 @@ function ListaProdutos(props) {
                     variant="secondary"
                     onClick={() => handleEditProduto(produtoItem)}
                   >
-                    <FaEdit  />
+                    <FaEdit />
                   </Button>
                 </td>
               </tr>
@@ -240,6 +257,22 @@ function ListaProdutos(props) {
           </Button>
           <Button variant="primary" onClick={handleSaveChanges}>
             Salvar Alterações
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal show={showDeleteConfirmation} onHide={hideDeleteConfirmModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Delete</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to delete the product "{deletingProdutoName}"?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={hideDeleteConfirmModal}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={confirmDeleteProduto}>
+            Delete
           </Button>
         </Modal.Footer>
       </Modal>
