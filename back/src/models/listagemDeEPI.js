@@ -4,7 +4,7 @@ const moment = require('moment');
 const Produto = require('./produtos');
 
 const ListaEpiSchema = new mongoose.Schema({
-        collaboratorId: { type: String, unique: true},
+        
         produtos: [{
             produto: {
                 type: mongoose.Schema.Types.ObjectId,

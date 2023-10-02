@@ -1,6 +1,5 @@
-const mongoose = require('mongoose');
-const ListaEpi = require('../models/listagemDeEPI'); 
-
+const ListaEpi = require('../models/listagemDeEPI');
+const { ITENS_POR_PAGINA } = require('../../config');
 const HTTP_STATUS = {
   OK: 200,
   CREATED: 201,
@@ -9,16 +8,9 @@ const HTTP_STATUS = {
   NO_CONTENT: 204,
 };
 
-const ITENS_POR_PAGINA = 15;
-
-const handleServerError = (resp, message, error) => {
+async function handleServerError(resp, message, error) {
   console.error(`${message}: ${error.message}`);
-  return resp.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ message: 'Erro interno do servidor.' });
-};
-
-async function tratarErroServidor(resp, mensagem, erro) {
-  console.error('Erro:', erro);
-  return resp.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ mensagem: mensagem, erro: erro.message });
+  return resp.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error.' });
 }
 
 module.exports = {
@@ -43,41 +35,50 @@ module.exports = {
       return handleServerError(resp, 'Erro ao cadastrar Listagem de Epi', error);
     }
   },
-
   async listListaEpi(req, resp) {
     try {
-      const pagina = parseInt(req.query.pagina, 10) || 1;
+      const page = parseInt(req.query.page, 10) || 1; // Corrigido para page
       const id = req.query._id;
-
+  
       let consulta = {};
       if (id) {
         consulta._id = id;
       }
-
+  
       const opcoes = {
-        page: pagina,
+        page: page, // Corrigido para page
         limit: ITENS_POR_PAGINA,
         populate: { path: 'produtos.produto', select: 'nome codigoCA validadeCA fabricacao' },
       };
-
+  
       const resultadoPaginado = await ListaEpi.paginate(consulta, opcoes);
       return resp.status(HTTP_STATUS.OK).json(resultadoPaginado);
     } catch (error) {
-      return tratarErroServidor(resp, 'Erro ao listar Lista de EPIs', error);
+      return handleServerError(resp, 'Erro ao listar Lista de EPIs', error);
     }
   },
-  
 
-  async updateListaEpi(req, resp) {
+  async adicionarProdutosListaEpi(req, resp) {
     try {
-      const { id } = req.params;
-      const updatedListaEpi = await ListaEpi.findByIdAndUpdate(id, req.body, { new: true });
-      if (!updatedListaEpi) {
-        return resp.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Listagem de EPI não encontrado.' });
+      const { id } = req.params;  // Extract id from URL
+      const { produtos } = req.body;  // Extract products from request body
+  
+      const listaEpi = await ListaEpi.findById(id);
+  
+      if (!listaEpi) {
+        return resp.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Lista de EPI não encontrada.' });
       }
-      return resp.status(HTTP_STATUS.OK).json(updatedListaEpi);
+  
+      // Assuming produtos is an array of product objects
+      listaEpi.produtos.push(...produtos);
+  
+      // Save the updated EPI list
+      await listaEpi.save();
+  
+      console.log('Produtos adicionados à ListaEpi com sucesso:', listaEpi);
+      return resp.status(HTTP_STATUS.OK).json(listaEpi);
     } catch (error) {
-      return handleServerError(resp, 'Erro ao atualizar ListaEpi', error);
+      return handleServerError(resp, 'Erro ao adicionar produtos à ListaEpi', error);
     }
   },
 
@@ -86,7 +87,7 @@ module.exports = {
       const { id } = req.params;
       const deletedListaEpi = await ListaEpi.findByIdAndRemove(id);
       if (!deletedListaEpi) {
-        return resp.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Listagem de EPI não encontrado.' });
+        return resp.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Listagem de EPI não encontrada.' });
       }
       return resp.status(HTTP_STATUS.NO_CONTENT).send();
     } catch (error) {

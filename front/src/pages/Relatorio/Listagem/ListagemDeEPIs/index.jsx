@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-// import Button from 'react-bootstrap/Button';
-// import { FaTrash, FaEdit } from 'react-icons/fa';
-import Table from 'react-bootstrap/Table';
+import { Container, Modal, Form, Button, Table } from 'react-bootstrap';
 import Header from '../../../../components/Header';
-import { Container } from 'react-bootstrap';
 import api from '../../../../services/services';
 
 function ListagemTela() {
@@ -12,58 +9,83 @@ function ListagemTela() {
   const matriculaParam = new URLSearchParams(location.search).get('matricula');
   const [listagem, setListagem] = useState([]);
   const [loading, setLoading] = useState(true);
-  console.log("********listagem", listagem)
+  const [showModal, setShowModal] = useState(false);
+  const [produtoData, setProdutoData] = useState({
+    produto: '',
+    quantidade: 0,
+    entrega: '',
+    vistoEntrega: 'YES',
+  });
+  const [produtosDisponiveis, setProdutosDisponiveis] = useState([]);
+  //console.log("***listagem._id", listagem[0]._id)
 
+  const handleCloseModal = () => setShowModal(false);
+  const handleShowModal = () => setShowModal(true);
 
-  // const handleDelete = () => {
-  //   // Lógica para exclusão
-  // };
+  const fetchData = async () => {
+    try {
+      if (matriculaParam) {
+        const matriculaResponse = await api.get(`/colaboradores?matricula=${matriculaParam}`);
+        const idListagem = matriculaResponse?.data?.colaborador[0]?.listagem?._id;
 
-  // const handleEdit = () => {
-  //   // Lógica para edição
-  // };
+        if (idListagem) {
+          const listagemResponse = await api.get(`listaEpi/?_id=${idListagem}`);
+          setListagem(listagemResponse?.data?.docs || []);
+        }
+      }
+
+      
+      const produtosResponse = await api.get('/produtos');
+      const produtos = produtosResponse?.data?.docs || [];
+      setProdutosDisponiveis(produtos);
+    } catch (error) {
+      console.error('Erro ao buscar dados:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClickAddProduto = async () => {
+    try {
+        await api.put(`listaEpi/${listagem[0]._id}`, {
+          produtos: [
+            {
+              produto: produtoData.produto,
+              quantidade: produtoData.quantidade,
+              entrega: produtoData.entrega,
+              vistoEntrega: produtoData.vistoEntrega,
+            },
+          ],
+        })
+
+      handleCloseModal();
+    } catch (error) {
+      console.error('Erro ao adicionar produto:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (matriculaParam) {
-          const matriculaResponse = await api.get(`/colaboradores?matricula=${matriculaParam}`);
-          const idListagem = matriculaResponse?.data?.colaborador[0]?.listagem?._id;
-
-          if (idListagem) {
-            const listagemResponse = await api.get(`listaEpi/?_id=${idListagem}`);
-            console.log('Dados da API:', listagemResponse.data);
-            setListagem(listagemResponse?.data?.docs || []);
-          }
-        }
-      } catch (error) {
-        console.error('Erro ao buscar dados:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
   }, [matriculaParam]);
 
   const formatarData = (data) => {
     if (!data) return '';
-  
     const dataObj = new Date(data);
-    if (isNaN(dataObj.getTime())) return '';  
-  
+    if (isNaN(dataObj.getTime())) return '';
     const dia = String(dataObj.getDate()).padStart(2, '0');
     const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
     const ano = dataObj.getFullYear();
     return `${dia}/${mes}/${ano}`;
   };
+
+
   return (
     <>
       <Header />
-      <br/>
+      <br />
       <Container>
-        <br/>
-      <h1 style={{ textAlign: 'center', color: 'white' }}>Listagem De EPIs</h1>
+        <br />
+        <h1 style={{ textAlign: 'center', color: 'white' }}>Listagem De EPIs</h1>
         <br />
         {loading ? (
           <p>Carregando...</p>
@@ -99,6 +121,73 @@ function ListagemTela() {
             </tbody>
           </Table>
         )}
+       <div style={{ textAlign: 'right', marginTop: '20px' }}>
+          <Button variant="primary" style={{ marginRight: '10px' }} onClick={handleShowModal}>
+            Adicionar
+          </Button>
+          <Button variant="secondary">
+            Editar
+          </Button>
+        </div>
+        <Modal show={showModal} onHide={handleCloseModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>Adicionar Produto</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <Form.Group controlId="formProduto">
+                <Form.Label>Produto</Form.Label>
+                <Form.Control
+                  as="select"
+                  value={produtoData.produto}
+                  onChange={(e) => setProdutoData({ ...produtoData, produto: e.target.value })}
+                >
+                  <option value="">Selecione um produto</option>
+                  {produtosDisponiveis.map((produto) => (
+                    <option key={produto._id} value={produto._id}>
+                      {produto.nome}
+                    </option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+
+              <Form.Group controlId="formQuantidade">
+                <Form.Label>Quantidade</Form.Label>
+                <Form.Control
+                  type="number"
+                  placeholder="Quantidade"
+                  value={produtoData.quantidade}
+                  onChange={(e) => setProdutoData({ ...produtoData, quantidade: parseInt(e.target.value, 10) })}
+                />
+              </Form.Group>
+
+              <Form.Group controlId="formEntrega">
+                <Form.Label>Data de Entrega</Form.Label>
+                <Form.Control
+                  type="datetime-local"
+                  value={produtoData.entrega}
+                  onChange={(e) => setProdutoData({ ...produtoData, entrega: e.target.value })}
+                />
+              </Form.Group>
+
+              <Form.Group controlId="formVistoEntrega">
+                <Form.Label>Visto de Entrega</Form.Label>
+                <Form.Control
+                  as="select"
+                  value={produtoData.vistoEntrega}
+                  onChange={(e) => setProdutoData({ ...produtoData, vistoEntrega: e.target.value })}
+                >
+                  <option value="YES">YES</option>
+                  <option value="NO">NO</option>
+                </Form.Control>
+              </Form.Group>
+
+              <Button variant="primary" onClick={handleClickAddProduto}>
+                Adicionar Produto
+              </Button>
+            </Form>
+          </Modal.Body>
+        </Modal>
       </Container>
     </>
   );
