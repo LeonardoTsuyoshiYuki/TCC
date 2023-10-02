@@ -25,17 +25,20 @@ function ListagemColaborador(props) {
     setShowModal(false);
   }
 
-  async function handleDeleteColaborador(Item) {
+  async function handleDeleteColaborador(colaborador) {
+    // console.log('Deleting colaborador:', colaborador);
+    setSelectedColaborador(colaborador);
+    setSelectedCargoId(colaborador.cargo._id);
     setShowDeleteConfirmation(true);
   }
 
-  async function confirmDeleteColaborador () {
+  async function confirmDeleteColaborador() {
     try {
       if (!selectedColaborador || !selectedColaborador._id) {
-        console.error('ID do colaborador não está definido.');
+        // console.error('ID do colaborador não está definido.');
         return;
       }
-  
+
       await api.delete(`/colaboradores/${selectedColaborador._id}`);
       AtualizarTabela(true);
       toast.success('Colaborador removido com sucesso.');
@@ -94,11 +97,13 @@ function ListagemColaborador(props) {
                 <td align="center">
                   <Button
                     variant="danger"
-                    onClick={() => handleDeleteColaborador(Item)}
+                    onClick={() => {
+                      // console.log('Delete button clicked for:', Item);
+                      handleDeleteColaborador(Item);
+                    }}
                   >
                     <FaTrash />
                   </Button>
-
                 </td>
                 <td align="center">
                   <Button

@@ -27,7 +27,7 @@ function SideBar({ active, Text }) {
         navigate("/relatorio") 
     }
     function handleClickInspecoesCadastro() {
-        navigate("/inspecoesCadastro") 
+        navigate("/cadastroInspecao") 
     }
 
     function closeSideBar() {

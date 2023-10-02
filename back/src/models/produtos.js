@@ -29,7 +29,7 @@ const ProdutoSchema = new mongoose.Schema({
     quantidade: {
         type: Number,
         required: true,
-        minlength: 10, // Isso deveria ser maxlength, não length
+        minlength: 10, 
     },
     registro: {
         type: Date,

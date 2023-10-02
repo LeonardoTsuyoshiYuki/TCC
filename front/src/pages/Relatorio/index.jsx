@@ -3,6 +3,7 @@ import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 import Header from '../../components/Header';
 import { useNavigate } from 'react-router-dom';
 
+
 const EntradaTela = () => {
   const [matricula, setMatricula] = useState('');
   const [opcao, setOpcao] = useState('listagem_epis');
@@ -10,14 +11,11 @@ const EntradaTela = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Aqui, você faria a chamada à sua API para verificar a matrícula.
-    // Suponha que você já tenha feito isso e tenha a resposta da API.
-
-    const matriculaExiste = true; // Suponha que a matrícula existe
-
+  
+    const matriculaExiste = true;
+  
     if (matriculaExiste) {
-      navigate(`/relatorioListagem?matricula=${matricula}&opcao=${opcao}`);
+      navigate(`/relatorioListagem?matricula=${matricula}`);
     } else {
       alert('Matrícula não encontrada.');
     }

@@ -22,7 +22,6 @@ const InspecoesController=require('../controllers/inspecoesController')
 
 
 //Rotas de Colaborador
-// routes.get('/colaboradores/?', colaboradorController.details)
 routes.get('/colaboradores', colaboradorController.listColaborador)
 routes.post('/colaboradores', colaboradorController.insertColaborador)
 routes.put('/colaboradores/:id', colaboradorController.updateColaborador)
@@ -40,7 +39,6 @@ routes.post('/produtos', produtosController.insertProduto)
 routes.put('/produtos/:id', produtosController.updateProduto)
 routes.delete('/produtos/:id', produtosController.deleteProduto)
 //Rotas de Listagem de EPIs
-routes.get('/listaEpi/:id', listagemEPIController.details)
 routes.get('/listaEpi', listagemEPIController.listListaEpi)
 routes.post('/listaEpi', listagemEPIController.insertListaEpi)
 routes.put('/listaEpi/:id', listagemEPIController.updateListaEpi)

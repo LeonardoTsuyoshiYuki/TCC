@@ -1,144 +1,107 @@
-// import React, { useEffect, useState } from 'react';
-// import { ToastContainer, toast } from 'react-toastify';
-// import { Table, Modal, Container } from 'react-bootstrap';
-// import 'react-toastify/dist/ReactToastify.css';
-// import api from '../../../services/services';
-// import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+// import Button from 'react-bootstrap/Button';
+// import { FaTrash, FaEdit } from 'react-icons/fa';
+import Table from 'react-bootstrap/Table';
+import Header from '../../../../components/Header';
+import { Container } from 'react-bootstrap';
+import api from '../../../../services/services';
 
-// function EpiTable({ epis}) {
-//   return (
-//     <Table striped bordered hover>
-//       <thead>
-//         <tr>
-//           <th>Nome</th>
-//           {/* ... restante do código ... */}
-//           <th>Excluir</th>
-//           <th>Editar</th>
-//         </tr>
-//       </thead>
-//       <tbody>
-//         {epis.map((epiItem) => (
-//           <tr key={epiItem._id}>
+function ListagemTela() {
+  const location = useLocation();
+  const matriculaParam = new URLSearchParams(location.search).get('matricula');
+  const [listagem, setListagem] = useState([]);
+  const [loading, setLoading] = useState(true);
+  console.log("********listagem", listagem)
 
-//           </tr>
-//         ))}
-//       </tbody>
-//     </Table>
-//   );
-// }
 
-// function EditModal({ epi, onClose }) {
-//   return (
-//     <Modal show={epi !== null} onHide={onClose}>
+  // const handleDelete = () => {
+  //   // Lógica para exclusão
+  // };
 
-//     </Modal>
-//   );
-// }
+  // const handleEdit = () => {
+  //   // Lógica para edição
+  // };
 
-// function DeleteConfirmationModal({ show, onCancel }) {
-//   return (
-//     <Modal show={show} onHide={onCancel}>
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (matriculaParam) {
+          const matriculaResponse = await api.get(`/colaboradores?matricula=${matriculaParam}`);
+          const idListagem = matriculaResponse?.data?.colaborador[0]?.listagem?._id;
 
-//     </Modal>
-//   );
-// }
+          if (idListagem) {
+            const listagemResponse = await api.get(`listaEpi/?_id=${idListagem}`);
+            console.log('Dados da API:', listagemResponse.data);
+            setListagem(listagemResponse?.data?.docs || []);
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-// function ListaEPI() {
-//   const location = useLocation();
-//   const searchParams = new URLSearchParams(location.search);
-//   const matricula = searchParams.get('matricula');
+    fetchData();
+  }, [matriculaParam]);
 
-//   const [listaEpis, setListaEpis] = useState([]);
-//   const [selectedEPI, setSelectedEPI] = useState(null);
+  const formatarData = (data) => {
+    if (!data) return '';
+  
+    const dataObj = new Date(data);
+    if (isNaN(dataObj.getTime())) return '';  
+  
+    const dia = String(dataObj.getDate()).padStart(2, '0');
+    const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
+    const ano = dataObj.getFullYear();
+    return `${dia}/${mes}/${ano}`;
+  };
+  return (
+    <>
+      <Header />
+      <br/>
+      <Container>
+        <br/>
+      <h1 style={{ textAlign: 'center', color: 'white' }}>Listagem De EPIs</h1>
+        <br />
+        {loading ? (
+          <p>Carregando...</p>
+        ) : (
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Quantidade</th>
+                <th>Código CA</th>
+                <th>Validade CA</th>
+                <th>Fabricação</th>
+                <th>Entrega</th>
+                <th>Visto de Entrega</th>
+                <th>Devolução</th>
+                <th>Visto de Devolução</th>
+              </tr>
+            </thead>
+            <tbody>
+              {listagem[0].produtos.map((produto, index) => (
+                <tr key={produto._id}>
+                  <td>{produto.produto.nome || ''}</td>
+                  <td>{produto.quantidade || ''}</td>
+                  <td>{produto.produto.codigoCA || ''}</td>
+                  <td>{formatarData(produto.produto.validadeCA) || ''}</td>
+                  <td>{formatarData(produto.produto.fabricacao) || ''}</td>
+                  <td>{formatarData(produto.entrega) || ''}</td>
+                  <td>{produto.vistoEntrega || ''}</td>
+                  <td>{formatarData(produto.devolucao) || ''}</td>
+                  <td>{produto.vistoDevolucao || ''}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        )}
+      </Container>
+    </>
+  );
+}
 
-//   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-//   const [deletingEPIId, setDeletingEPIId] = useState('');
-//   const [deletingEPIName, setDeletingEPIName] = useState('');
-
-//   async function fetchData() {
-//     try {
-//       const response = await api.get(`/listaEpi?matricula=${matricula}`);
-//       setListaEpis(response.data.docs);
-//     } catch (error) {
-//       toast.error('Erro ao buscar os EPIs.');
-//     }
-//   }
-
-//   useEffect(() => {
-//     fetchData();
-//   }, [matricula]);
-
-//   async function handleDeleteEPI(id, nome) {
-//     setDeletingEPIId(id);
-//     setDeletingEPIName(nome);
-//     setShowDeleteConfirmation(true);
-//   }
-
-//   async function confirmDeleteEPI() {
-//     try {
-//       await api.delete(`/listaEpi/${deletingEPIId}`);
-//       toast.success(`EPI "${deletingEPIName}" excluído com sucesso.`);
-//       fetchData();
-//       hideDeleteConfirmModal();
-//     } catch (error) {
-//       toast.error('Erro ao excluir o EPI.');
-//     }
-//   }
-
-//   function hideDeleteConfirmModal() {
-//     setDeletingEPIId('');
-//     setDeletingEPIName('');
-//     setShowDeleteConfirmation(false);
-//   }
-
-//   function openModal(epiItem) {
-//     setSelectedEPI({ ...epiItem });
-//   }
-
-//   function closeModal() {
-//     setSelectedEPI(null);
-//   }
-
-//   async function handleSaveChanges() {
-//     try {
-//       const response = await api.put(`/listaEpi/${selectedEPI._id}`, selectedEPI);
-
-//       if (response.status === 200) {
-//         toast.success('Alterações salvas com sucesso.');
-//         fetchData();
-//         closeModal();
-//       } else {
-//         toast.error('Erro ao salvar as alterações.');
-//       }
-//     } catch (error) {
-//       console.error('Erro ao salvar as alterações:', error);
-//       toast.error('Erro ao salvar as alterações.');
-//     }
-//   }
-
-//   return (
-//     <>
-//       <Container className="d-flex align-items-center justify-content-center">
-//         <div className="text-center">
-//           <h1 style={{ color: 'white' }}>RELATÓRIO</h1>
-//           <br />
-//           <EpiTable
-//             epis={listaEpis}
-//             onDelete={(id, nome) => handleDeleteEPI(id, nome)}
-//             onEdit={(epiItem) => openModal(epiItem)}
-//           />
-//           <ToastContainer autoClose={2000} position={toast.POSITION.BOTTOM_LEFT} />
-//           <EditModal epi={selectedEPI} onSave={handleSaveChanges} onClose={closeModal} />
-//           <DeleteConfirmationModal
-//             epiName={deletingEPIName}
-//             show={showDeleteConfirmation}
-//             onConfirm={confirmDeleteEPI}
-//             onCancel={hideDeleteConfirmModal}
-//           />
-//         </div>
-//       </Container>
-//     </>
-//   );
-// }
-
-// export default ListaEPI;
+export default ListagemTela;

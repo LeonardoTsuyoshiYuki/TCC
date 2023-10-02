@@ -65,10 +65,22 @@ function SignUp() {
     }
 
     const handleChange = (field, value) => {
-        setUser((prevUser) => ({
-            ...prevUser,
-            [field]: value,
-        }));
+        if (field.startsWith('endereco.')) {
+            // If the field is part of the endereco object
+            setUser((prevUser) => ({
+                ...prevUser,
+                endereco: {
+                    ...prevUser.endereco,
+                    [field.split('.')[1]]: value, // Update the nested field (cidade or estado)
+                },
+            }));
+        } else {
+            // If the field is a direct property of user
+            setUser((prevUser) => ({
+                ...prevUser,
+                [field]: value,
+            }));
+        }
         setError(""); // Clear error when input changes
     };
 
@@ -187,7 +199,7 @@ function SignUp() {
                                     <Form.Control
                                         type="text"
                                         placeholder="Digite o polo"
-                                        value={user.polo}
+                                        value={user.endereco.polo}
                                         onChange={(e) => handleChange("endereco.polo", e.target.value)}
                                     />
                                 </Form.Group>
