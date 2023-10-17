@@ -16,28 +16,33 @@ async function handleServerError(resp, message, error) {
 module.exports = {
   async insertListaEpi(req, resp) {
     try {
-      const { produtos, ...listaEpiData } = req.body;
-
-      const produtosWithDetails = produtos.map(prod => ({
-        produto: prod._id,
-        quantidade: prod.quantidade,
-        entrega: listaEpiData.entrega,
-        vistoEntrega: listaEpiData.vistoEntrega,
-      }));
-
+      const { produtos, entrega, vistoEntrega, ...listaEpiData } = req.body;
+  
+      // Check if produtos is an array before using map
+      const produtosWithDetails = Array.isArray(produtos)
+        ? produtos.map(prod => ({
+            produto: prod._id,
+            quantidade: prod.quantidade,
+            entrega,
+            vistoEntrega,
+          }))
+        : [];
+  
       listaEpiData.produtos = produtosWithDetails;
-
+  
       const novaListaEpi = await ListaEpi.create(listaEpiData);
-
+  
       console.log('ListaEpi cadastrada com sucesso:', novaListaEpi);
       return resp.status(HTTP_STATUS.CREATED).json(novaListaEpi);
     } catch (error) {
+      console.error('Erro ao cadastrar Listagem de Epi:', error.message);
       return handleServerError(resp, 'Erro ao cadastrar Listagem de Epi', error);
     }
   },
+
   async listListaEpi(req, resp) {
     try {
-      const page = parseInt(req.query.page, 10) || 1; // Corrigido para page
+      const page = parseInt(req.query.page, 10) || 1;
       const id = req.query._id;
   
       let consulta = {};
@@ -46,7 +51,7 @@ module.exports = {
       }
   
       const opcoes = {
-        page: page, // Corrigido para page
+        page,
         limit: ITENS_POR_PAGINA,
         populate: { path: 'produtos.produto', select: 'nome codigoCA validadeCA fabricacao' },
       };
@@ -60,8 +65,8 @@ module.exports = {
 
   async adicionarProdutosListaEpi(req, resp) {
     try {
-      const { id } = req.params;  // Extract id from URL
-      const { produtos } = req.body;  // Extract products from request body
+      const { id } = req.params;
+      const { produtos } = req.body;
   
       const listaEpi = await ListaEpi.findById(id);
   
@@ -69,10 +74,7 @@ module.exports = {
         return resp.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Lista de EPI não encontrada.' });
       }
   
-      // Assuming produtos is an array of product objects
       listaEpi.produtos.push(...produtos);
-  
-      // Save the updated EPI list
       await listaEpi.save();
   
       console.log('Produtos adicionados à ListaEpi com sucesso:', listaEpi);

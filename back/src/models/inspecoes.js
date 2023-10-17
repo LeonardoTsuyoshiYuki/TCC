@@ -1,32 +1,29 @@
 const mongoose = require("mongoose");
-const mongoosePaginacao = require('mongoose-paginate')
+const mongoosePaginate = require("mongoose-paginate");
 
 const InspecoesSchema = new mongoose.Schema({
-    data: {
-        type: Date,
-        default: Date.now,
-    },
-    perguntas: {
+    inspecoes: [{
         pergunta: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Pergunta',
         },
-    },
-    resposta: {
-        type: String, 
-    },
+        resposta: {
+            type: String,
+            uppercase: true,
+            maxlength: 200,
+        },
+    }],
     registro: {
         type: Date,
         default: Date.now
     }
-
-});
-InspecoesSchema.pre('save', function(next) {
-    if (this.data) {
-        this.data = moment(this.data, 'DD/MM/YYYY').toDate();
-    }
-    next();
 });
 
-InspecoesSchema.plugin(mongoosePaginacao)
-mongoose.model('Inspecoes', InspecoesSchema);
+// Validar tamanho da resposta
+InspecoesSchema.path('inspecoes.resposta').validate(function(value) {
+    return value.length <= 200;
+}, 'Resposta length must not exceed 200 characters');
+
+InspecoesSchema.plugin(mongoosePaginate);
+
+module.exports = mongoose.model('Inspecoes', InspecoesSchema);

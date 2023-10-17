@@ -4,7 +4,6 @@ const mongoosePaginacao = require('mongoose-paginate')
 const PerguntaSchema = new mongoose.Schema({
     pergunta: {
         type: String,
-        required: true,
         unique: true,
     },
 });

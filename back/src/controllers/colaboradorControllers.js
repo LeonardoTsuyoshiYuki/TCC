@@ -1,36 +1,42 @@
 const mongoose = require('mongoose');
 const Colaborador = mongoose.model('User');
 const ListagemEpis = mongoose.model('ListaEpi');
+const Inspecoes = mongoose.model('Inspecoes');
+
 const uuid = require('uuid');
 
 module.exports = {
     async insertColaborador(req, resp) {
         try {
-            const colaboradorData = req.body;
+            const dadosColaborador = req.body;
     
             // Gerar um UUID para "collaboratorId"
-            colaboradorData.collaboratorId = uuid.v4();
+            dadosColaborador.collaboratorId = uuid.v4();
     
             // Criar uma nova lista de EPIS para o colaborador
             const listaEpis = await ListagemEpis.create({ epis: [] });
-            colaboradorData.listagem = listaEpis._id;
+            dadosColaborador.listagem = listaEpis._id;
     
-            // Verifique se os campos obrigatórios estão presentes
+            // Criar uma nova inspeção para o colaborador
+            const inspecao = await Inspecoes.create({ pergunta: [], resposta: [] });
+            dadosColaborador.inspecoes = inspecao._id;
+    
+            // Verificar se os campos obrigatórios estão presentes
             const camposObrigatorios = ['nome', 'matricula', 'email', 'telefone', 'cpf', 'password', 'endereco'];
-            const camposFaltantes = camposObrigatorios.filter(campo => !colaboradorData[campo]);
+            const camposFaltantes = camposObrigatorios.filter(campo => !dadosColaborador[campo]);
     
             if (camposFaltantes.length > 0) {
                 return resp.status(400).json({ message: `Campos obrigatórios faltando: ${camposFaltantes.join(', ')}` });
             }
     
-            // Verifique se a matrícula já existe
-            const matriculaExistente = await Colaborador.findOne({ matricula: colaboradorData.matricula });
+            // Verificar se a matrícula já existe
+            const matriculaExistente = await Colaborador.findOne({ matricula: dadosColaborador.matricula });
             if (matriculaExistente) {
-                return resp.status(400).json({ message: "Matrícula já existente", matricula: colaboradorData.matricula });
+                return resp.status(400).json({ message: "Matrícula já existente", matricula: dadosColaborador.matricula });
             }
     
-            // Crie o novo colaborador
-            const novoColaborador = await Colaborador.create(colaboradorData);
+            // Criar o novo colaborador
+            const novoColaborador = await Colaborador.create(dadosColaborador);
             console.log("Colaborador cadastrado com sucesso:", novoColaborador);
     
             return resp.status(201).json(novoColaborador);
@@ -45,7 +51,7 @@ module.exports = {
             const { page, nome, matricula, cpf, ativo } = req.query;
             const pageNumber = parseInt(page, 10) || 1;
             const pageSize = 15;
-
+    
             const query = {};
             if (nome) {
                 query.nome = { $regex: new RegExp(nome, 'i') }; 
@@ -59,15 +65,15 @@ module.exports = {
             if (ativo !== undefined) {
                 query.ativo = (ativo.toLowerCase() === 'true'); 
             }
-
+    
             const options = {
                 page: pageNumber,
                 limit: pageSize,
-                populate: ['cargo', 'listagem']
+                populate: ['cargo', 'listagem', 'inspecoes']  // Adicionando 'inspecoes' para populá-la
             };
-
+    
             const { docs: colaborador, totalDocs: total } = await Colaborador.paginate(query, options);
-
+    
             if (total === 0) {
                 return res.status(404).json({ message: "Nenhum colaborador encontrado." });
             }
@@ -105,13 +111,19 @@ module.exports = {
             // Antes de excluir o colaborador, obtenha a listagem associada
             const colaborador = await Colaborador.findById(idColaborador);
             const listaEpisId = colaborador.listagem;
+            const inspecoesId = colaborador.inspecoes;
 
             // Se houver uma lista de EPIS associada, exclua-a
             if (listaEpisId) {
                 await ListagemEpis.findByIdAndRemove(listaEpisId);
                 console.log("Lista de EPIS associada excluída com sucesso.");
             }
-
+    
+            // Se houver uma lista de Inspecoes associada, exclua-a
+            if (inspecoesId) {
+                await Inspecoes.findByIdAndRemove(inspecoesId);
+                console.log("Lista de Inspecoes associada excluída com sucesso.");
+            }
             const colaboradorExcluido = await Colaborador.findByIdAndRemove(idColaborador);
 
             if (!colaboradorExcluido) {

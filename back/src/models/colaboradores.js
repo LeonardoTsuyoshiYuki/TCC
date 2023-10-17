@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const mongoosePaginate = require('mongoose-paginate');
+const bcrypt = require('bcrypt');
 
 const UserSchema = new mongoose.Schema({
     nome: {
@@ -27,7 +28,7 @@ const UserSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Funcao'
     },
-    inspecao: {
+    inspecoes: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Inspecoes'
     },
@@ -77,5 +78,30 @@ const UserSchema = new mongoose.Schema({
 });
 
 UserSchema.plugin(mongoosePaginate);
+
+// Hash da senha antes de salvar no banco de dados
+UserSchema.pre('save', async function (next) {
+    const user = this;
+
+    if (!user.isModified('password')) return next();
+
+    try {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(user.password, salt);
+        user.password = hashedPassword;
+        next();
+    } catch (error) {
+        return next(error);
+    }
+});
+
+// Função para verificar a senha
+UserSchema.methods.verifyPassword = async function (password) {
+    try {
+        return await bcrypt.compare(password, this.password);
+    } catch (error) {
+        throw new Error(error);
+    }
+};
 
 mongoose.model('User', UserSchema);
