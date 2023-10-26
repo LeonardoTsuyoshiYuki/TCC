@@ -28,9 +28,9 @@ const UserSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Funcao'
     },
-    inspecoes: {
+    listagemInspecoes: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Inspecoes'
+        ref: 'ListagemInspecoes' 
     },
     listagem: {
         type: mongoose.Schema.Types.ObjectId,

@@ -6,9 +6,8 @@ const funcaoController=require('../controllers/funcaoController')
 const produtosController=require('../controllers/produtosController')
 const listagemEPIController=require('../controllers/listagemEPIControlle')
 const PerguntaController=require('../controllers/perguntaControlle')
-const InspecoesController=require('../controllers/inspecoesController')
-
-
+const ListagemInspecoesController=require('../controllers/listagemInspecoesController')
+const InspecaoController=require('../controllers/inspecaoController')
 
 
 
@@ -50,14 +49,17 @@ routes.post('/pergunta', PerguntaController.insertPergunta);
 routes.put('/pergunta/:id', PerguntaController.updatePergunta);
 routes.delete('/pergunta/:id', PerguntaController.deletePergunta);
 
-// Rotas para Inspecoes
-routes.get('/inspecao', InspecoesController.listInspecao);
-routes.get('/inspecao/:id', InspecoesController.details);
-routes.post('/inspecao', InspecoesController.insertInspecao);
-routes.put('/inspecao/:id', InspecoesController.updateInspecao);
-routes.delete('/inspecao/:id', InspecoesController.deleteInspecao);
+// Rotas para Listagem Inspecoes
+routes.get('/listagemInspecao', ListagemInspecoesController.listListagemInspecoes);
+routes.get('/listagemInspecao/:id', ListagemInspecoesController.details);
+routes.post('/listagemInspecao', ListagemInspecoesController.insertListagemInspecoes);
+routes.put('/listagemInspecao/:id', ListagemInspecoesController.updateListagemInspecoes);
+routes.delete('/listagemInspecao/:id', ListagemInspecoesController.deleteListagemInspecoes);
 
-
+// Rotas para Inspeção
+routes.get('/inspecao', InspecaoController.listInspecao);
+routes.post('/inspecao/:id', InspecaoController.insertInspecao);
+routes.delete('/inspecao/:id', InspecaoController.deleteInspecao);
 
 
 

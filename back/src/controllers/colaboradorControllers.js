@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Colaborador = mongoose.model('User');
 const ListagemEpis = mongoose.model('ListaEpi');
-const Inspecoes = mongoose.model('Inspecoes');
+const ListagemInspecoes = mongoose.model('ListagemInspecoes');
 
 const uuid = require('uuid');
 
@@ -18,8 +18,8 @@ module.exports = {
             dadosColaborador.listagem = listaEpis._id;
     
             // Criar uma nova inspeção para o colaborador
-            const inspecao = await Inspecoes.create({ pergunta: [], resposta: [] });
-            dadosColaborador.inspecoes = inspecao._id;
+            const inspecao = await ListagemInspecoes.create({ pergunta: [], resposta: [] });
+            dadosColaborador.listagemInspecoes = inspecao._id;   
     
             // Verificar se os campos obrigatórios estão presentes
             const camposObrigatorios = ['nome', 'matricula', 'email', 'telefone', 'cpf', 'password', 'endereco'];
@@ -69,7 +69,7 @@ module.exports = {
             const options = {
                 page: pageNumber,
                 limit: pageSize,
-                populate: ['cargo', 'listagem', 'inspecoes']  // Adicionando 'inspecoes' para populá-la
+                populate: ['cargo', 'listagem', 'listagemInspecoes']  // Adicionando 'ListagemInspecoes' para populá-la
             };
     
             const { docs: colaborador, totalDocs: total } = await Colaborador.paginate(query, options);
@@ -111,7 +111,7 @@ module.exports = {
             // Antes de excluir o colaborador, obtenha a listagem associada
             const colaborador = await Colaborador.findById(idColaborador);
             const listaEpisId = colaborador.listagem;
-            const inspecoesId = colaborador.inspecoes;
+            const ListagemInspecoesId = colaborador.ListagemInspecoes;
 
             // Se houver uma lista de EPIS associada, exclua-a
             if (listaEpisId) {
@@ -119,10 +119,10 @@ module.exports = {
                 console.log("Lista de EPIS associada excluída com sucesso.");
             }
     
-            // Se houver uma lista de Inspecoes associada, exclua-a
-            if (inspecoesId) {
-                await Inspecoes.findByIdAndRemove(inspecoesId);
-                console.log("Lista de Inspecoes associada excluída com sucesso.");
+            // Se houver uma lista de ListagemInspecoes associada, exclua-a
+            if (ListagemInspecoesId) {
+                await ListagemInspecoes.findByIdAndRemove(ListagemInspecoesId);
+                console.log("Lista de ListagemInspecoes associada excluída com sucesso.");
             }
             const colaboradorExcluido = await Colaborador.findByIdAndRemove(idColaborador);
 

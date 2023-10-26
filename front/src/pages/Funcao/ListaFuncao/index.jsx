@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaTrash, FaSearch, FaEdit } from "react-icons/fa";
+import { FaTrash, FaEdit } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import { Table, Button, Modal, Form } from "react-bootstrap";
 import 'react-toastify/dist/ReactToastify.css';

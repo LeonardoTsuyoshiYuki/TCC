@@ -27,7 +27,6 @@ function SignUp() {
         },
     });
     const [cargos, setCargos] = useState([]);
-    const [error, setError] = useState("");
     const navigate = useNavigate();
     const { signup } = useAuth();
 
@@ -45,17 +44,10 @@ function SignUp() {
     }
 
     async function handleClickCadastro() {
-        // Validation logic here
-        // ...
-
         try {
             await api.post(`/colaboradores`, user);
 
-            const res = signup(user.matricula, user.password);
-            if (res) {
-                setError(res);
-                return;
-            }
+            signup(user.matricula, user.password);
 
             alert("Usuário cadastrado com sucesso!");
             navigate("/");
@@ -81,7 +73,6 @@ function SignUp() {
                 [field]: value,
             }));
         }
-        setError(""); // Clear error when input changes
     };
 
     return (
