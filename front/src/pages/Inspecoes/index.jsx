@@ -4,7 +4,7 @@ import Header from '../../components/Header';
 import { useNavigate } from 'react-router-dom';
 
 
-const EntradaInspecao = () => {
+function EntradaTela() {
   const [matricula, setMatricula] = useState('');
   const navigate = useNavigate();
 
@@ -14,7 +14,7 @@ const EntradaInspecao = () => {
     const matriculaExiste = true;
   
     if (matriculaExiste) {
-      navigate(`/entradaInspecao?matricula=${matricula}`);
+      navigate(`/inspecao?matricula=${matricula}`);
     } else {
       alert('Matrícula não encontrada.');
     }
@@ -40,12 +40,6 @@ const EntradaInspecao = () => {
                   />
                 </Form.Group>
                 <br />
-                <Form.Group controlId="formOpcoes">
-                  <Form.Label style={{ color: 'white' }}>
-                    Escolha uma opção:
-                  </Form.Label>
-                </Form.Group>
-                <br />
                 <Button variant="primary" type="submit">
                   Enviar
                 </Button>
@@ -58,4 +52,4 @@ const EntradaInspecao = () => {
   );
 };
 
-export default EntradaInspecao;
+export default EntradaTela;
