@@ -6,6 +6,10 @@ const ListagemInspecoesSchema = new mongoose.Schema({
         inspecao: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Inspecao',
+        },
+        registro: {
+            type: Date,
+            default: Date.now
         }
     }],
     registro: {

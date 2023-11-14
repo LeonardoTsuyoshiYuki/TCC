@@ -9,8 +9,10 @@ import Funcao from "../pages/Funcao"
 import Produtos from "../pages/Produtos"
 import Relatorio from "../pages/Relatorio"
 import Listagem from "../pages/Relatorio/Listagem/ListagemDeEPIs"
+import ListagemInspecao from "../pages/Relatorio/Listagem/Inspeções"
 import entradaInspecao from "../pages/Inspecoes"
 import Inspecao from "../pages/Inspecoes/CadastroInspeção/cadastroInspecao"
+
 
 function Private({ Item }) {
     const { signed } = useAuth();
@@ -40,6 +42,8 @@ function RoutesApp(){
                     <Route exact path="/inspecao" element={<Private Item={Inspecao}/>} />
                     <Route path="/" element={<SignIn />} />
                     <Route exact path="/relatorioListagem" element={<Private Item={Listagem}/>} />
+                    <Route path="/" element={<SignIn />} />
+                    <Route exact path="/relatorioInspecao" element={<Private Item={ListagemInspecao}/>} />
                     <Route path="/" element={<SignIn />} />
                 </Routes>
             </Fragment>

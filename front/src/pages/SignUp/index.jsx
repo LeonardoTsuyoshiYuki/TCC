@@ -10,235 +10,200 @@ import api from "../../services/services";
 import Card from 'react-bootstrap/Card';
 
 function SignUp() {
-    const [user, setUser] = useState({
-        nome: "",
-        matricula: "",
-        email: "",
-        cargo: "",
-        telefone: "",
-        cpf: "",
-        password: "",
-        passwordConf: "",
-        ativo: true,
+  const [user, setUser] = useState({
+    nome: "",
+    matricula: "",
+    email: "",
+    cargo: "",
+    telefone: "",
+    cpf: "",
+    password: "",
+    passwordConf: "",
+    ativo: true,
+    endereco: {
+      cidade: "",
+      estado: "",
+      polo: "",
+    },
+  });
+
+  const [cargos, setCargos] = useState([]);
+  const navigate = useNavigate();
+  const { signup } = useAuth();
+
+  useEffect(() => {
+    BuscaFuncao();
+  }, []);
+
+  async function BuscaFuncao() {
+    try {
+      const response = await api.get("/funcao");
+      setCargos(response.data.docs);
+    } catch (error) {
+      console.error("Erro ao buscar cargos:", error);
+    }
+  }
+
+  async function handleClickCadastro() {
+    try {
+      await api.post(`/colaboradores`, user);
+
+      signup(user.matricula, user.password);
+
+      alert("Usuário cadastrado com sucesso!");
+      navigate("/");
+    } catch (error) {
+      alert("Erro ao cadastrar usuário!");
+    }
+  }
+
+  const handleChange = (field, value) => {
+    if (field.startsWith("endereco.")) {
+      field = field.split(".")[1];
+      setUser((prevUser) => ({
+        ...prevUser,
         endereco: {
-            cidade: "",
-            estado: "",
-            polo: "",
+          ...prevUser.endereco,
+          [field]: value,
         },
-    });
-    const [cargos, setCargos] = useState([]);
-    const navigate = useNavigate();
-    const { signup } = useAuth();
-
-    useEffect(() => {
-        BuscaFuncao();
-    }, []);
-
-    async function BuscaFuncao() {
-        try {
-            const response = await api.get("/funcao");
-            setCargos(response.data.docs);
-        } catch (error) {
-            console.error("Erro ao buscar cargos:", error);
-        }
+      }));
+    } else {
+      setUser((prevUser) => ({
+        ...prevUser,
+        [field]: value,
+      }));
     }
+  };
 
-    async function handleClickCadastro() {
-        try {
-            await api.post(`/colaboradores`, user);
-
-            signup(user.matricula, user.password);
-
-            alert("Usuário cadastrado com sucesso!");
-            navigate("/");
-        } catch (error) {
-            alert("Erro ao cadastrar usuário!");
-        }
-    }
-
-    const handleChange = (field, value) => {
-        if (field.startsWith('endereco.')) {
-            // If the field is part of the endereco object
-            setUser((prevUser) => ({
-                ...prevUser,
-                endereco: {
-                    ...prevUser.endereco,
-                    [field.split('.')[1]]: value, // Update the nested field (cidade or estado)
-                },
-            }));
-        } else {
-            // If the field is a direct property of user
-            setUser((prevUser) => ({
-                ...prevUser,
-                [field]: value,
-            }));
-        }
-    };
-
-    return (
-        <Container>
-            <Card>
-                <Card.Header> <h1 style={{ textAlign: 'center' }}>Cadastro Colaborador</h1></Card.Header>
-                <Card.Body>
-                    <Form>
-                        <Row>
-                            <Col>
-                                <Form.Group controlId="nome">
-                                    <Form.Label style={{ textAlign: 'center' }}>Nome</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Digite seu Nome"
-                                        value={user.nome}
-                                        onChange={(e) => handleChange("nome", e.target.value)}
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col>
-                                <Form.Group controlId="matricula">
-                                    <Form.Label style={{ textAlign: 'center' }}>Matrícula</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Digite sua Matricula"
-                                        value={user.matricula}
-                                        onChange={(e) => handleChange("matricula", e.target.value)}
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <br />
-                        <Row>
-                            <Col>
-                                <Form.Group controlId="email">
-                                    <Form.Label style={{ textAlign: 'center' }}>Email</Form.Label>
-                                    <Form.Control
-                                        type="email"
-                                        placeholder="Digite seu Email"
-                                        value={user.email}
-                                        onChange={(e) => handleChange("email", e.target.value)}
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col>
-                                <Form.Group controlId="cargo">
-                                    <Form.Label style={{ textAlign: 'center' }}>Cargo</Form.Label>
-                                    <Form.Select
-                                        value={user.cargo}
-                                        onChange={(e) => handleChange("cargo", e.target.value)}
-                                    >
-                                        <option value="">Selecione um cargo</option>
-                                        {cargos.map((cargo) => (
-                                            <option key={cargo._id} value={cargo._id}>
-                                                {cargo.nome}
-                                            </option>
-                                        ))}
-                                    </Form.Select>
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <br />
-                        <Row>
-                            <Col>
-                                <Form.Group controlId="telefone">
-                                    <Form.Label style={{ textAlign: 'center' }}>Telefone</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Digite seu Telefone"
-                                        value={user.telefone}
-                                        onChange={(e) => handleChange("telefone", e.target.value)}
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col>
-                                <Form.Group controlId="cpf">
-                                    <Form.Label style={{ textAlign: 'center' }}>CPF</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Digite seu CPF"
-                                        value={user.cpf}
-                                        onChange={(e) => handleChange("cpf", e.target.value)}
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <br />
-                        <Row>
-                            <Col>
-                                <Form.Group controlId="cidade">
-                                    <Form.Label style={{ textAlign: 'center' }}>Cidade</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Digite a cidade"
-                                        value={user.endereco.cidade}
-                                        onChange={(e) => handleChange("endereco.cidade", e.target.value)}
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col>
-                                <Form.Group controlId="estado">
-                                    <Form.Label style={{ textAlign: 'center' }}>Estado</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Digite o estado"
-                                        value={user.endereco.estado}
-                                        onChange={(e) => handleChange("endereco.estado", e.target.value)}
-                                    />
-                                </Form.Group>
-                            </Col>
-                            <Col>
-                                <Form.Group controlId="polo">
-                                    <Form.Label style={{ textAlign: 'center' }}>Polo</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Digite o polo"
-                                        value={user.endereco.polo}
-                                        onChange={(e) => handleChange("endereco.polo", e.target.value)}
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <br />
-
-                        <Row>
-                            <Col>
-                                <Form.Group controlId="password">
-                                    <Form.Label style={{ textAlign: 'center' }}>Senha</Form.Label>
-                                    <Form.Control
-                                        type="password"
-                                        placeholder="Digite sua Senha"
-                                        value={user.password}
-                                        onChange={(e) => handleChange("password", e.target.value)}
-                                    />
-                                </Form.Group>
-                            </Col>
-                            
-                            <Col>
-                                <Form.Group controlId="passwordConf">
-                                    <Form.Label style={{ textAlign: 'center' }}>Confirme sua Senha</Form.Label>
-                                    <Form.Control
-                                        type="password"
-                                        placeholder="Confirme sua senha"
-                                        value={user.passwordConf}
-                                        onChange={(e) => handleChange("passwordConf", e.target.value)}
-                                    />
-                                </Form.Group>
-                            </Col>
-                        </Row>
-
-                    </Form>
-                </Card.Body>
-                <br />
-                <Card.Footer className="text-center">
-                    <Button style={{ alignItems: 'center', color: 'white' }} variant="primary" onClick={handleClickCadastro}>
-                        Inscrever-se
-                    </Button>
-
-                    <p>
-                        Já tem uma conta? <Link to="/">Entre</Link>
-                    </p>
-                </Card.Footer>
-            </Card>
-        </Container>
-    );
+  return (
+    <Container>
+      <Card>
+        <Card.Header> <h1 style={{ textAlign: 'center' }}>Cadastro Colaborador</h1></Card.Header>
+        <Card.Body>
+          <Form>
+            <Row>
+              {[
+                { controlId: "nome", label: "Nome", type: "text" },
+                { controlId: "matricula", label: "Matrícula", type: "text" },
+              ].map((input) => (
+                <Col key={input.controlId}>
+                  <Form.Group controlId={input.controlId}>
+                    <Form.Label style={{ textAlign: 'center' }}>{input.label}</Form.Label>
+                    <Form.Control
+                      type={input.type}
+                      placeholder={`Digite seu ${input.label}`}
+                      value={user[input.controlId]}
+                      onChange={(e) => handleChange(input.controlId, e.target.value)}
+                    />
+                  </Form.Group>
+                </Col>
+              ))}
+            </Row>
+            <br />
+            <Row>
+              {[
+                { controlId: "email", label: "Email", type: "email" },
+                { controlId: "cargo", label: "Cargo", type: "select" },
+              ].map((input) => (
+                <Col key={input.controlId}>
+                  <Form.Group controlId={input.controlId}>
+                    <Form.Label style={{ textAlign: 'center' }}>{input.label}</Form.Label>
+                    {input.type === "select" ? (
+                      <Form.Select
+                        value={user.cargo}
+                        onChange={(e) => handleChange("cargo", e.target.value)}
+                      >
+                        <option value="">Selecione um cargo</option>
+                        {cargos.map((cargo) => (
+                          <option key={cargo._id} value={cargo._id}>
+                            {cargo.nome}
+                          </option>
+                        ))}
+                      </Form.Select>
+                    ) : (
+                      <Form.Control
+                        type={input.type}
+                        placeholder={`Digite seu ${input.label}`}
+                        value={user[input.controlId]}
+                        onChange={(e) => handleChange(input.controlId, e.target.value)}
+                      />
+                    )}
+                  </Form.Group>
+                </Col>
+              ))}
+            </Row>
+            <br />
+            <Row>
+              {[
+                { controlId: "telefone", label: "Telefone", type: "text" },
+                { controlId: "cpf", label: "CPF", type: "text" },
+              ].map((input) => (
+                <Col key={input.controlId}>
+                  <Form.Group controlId={input.controlId}>
+                    <Form.Label style={{ textAlign: 'center' }}>{input.label}</Form.Label>
+                    <Form.Control
+                      type={input.type}
+                      placeholder={`Digite seu ${input.label}`}
+                      value={user[input.controlId]}
+                      onChange={(e) => handleChange(input.controlId, e.target.value)}
+                    />
+                  </Form.Group>
+                </Col>
+              ))}
+            </Row>
+            <br />
+            <Row>
+              {[
+                { controlId: "endereco.cidade", label: "Cidade", type: "text" },
+                { controlId: "endereco.estado", label: "Estado", type: "text" },
+                { controlId: "endereco.polo", label: "Polo", type: "text" },
+              ].map((input) => (
+                <Col key={input.controlId}>
+                  <Form.Group controlId={input.controlId}>
+                    <Form.Label style={{ textAlign: 'center' }}>{input.label}</Form.Label>
+                    <Form.Control
+                      type={input.type}
+                      placeholder={`Digite a ${input.label}`}
+                      value={user[input.controlId]}
+                      onChange={(e) => handleChange(input.controlId, e.target.value)}
+                    />
+                  </Form.Group>
+                </Col>
+              ))}
+            </Row>
+            <br />
+            <Row>
+              {[
+                { controlId: "password", label: "Senha", type: "password" },
+                { controlId: "passwordConf", label: "Confirme sua Senha", type: "password" },
+              ].map((input) => (
+                <Col key={input.controlId}>
+                  <Form.Group controlId={input.controlId}>
+                    <Form.Label style={{ textAlign: 'center' }}>{input.label}</Form.Label>
+                    <Form.Control
+                      type={input.type}
+                      placeholder={`Digite sua ${input.label}`}
+                      value={user[input.controlId]}
+                      onChange={(e) => handleChange(input.controlId, e.target.value)}
+                    />
+                  </Form.Group>
+                </Col>
+              ))}
+            </Row>
+          </Form>
+        </Card.Body>
+        <br />
+        <Card.Footer className="text-center">
+          <Button style={{ alignItems: 'center', color: 'white' }} variant="primary" onClick={handleClickCadastro}>
+            Inscrever-se
+          </Button>
+          <p>
+            Já tem uma conta? <Link to="/">Entre</Link>
+          </p>
+        </Card.Footer>
+      </Card>
+    </Container>
+  );
 }
 
 export default SignUp;

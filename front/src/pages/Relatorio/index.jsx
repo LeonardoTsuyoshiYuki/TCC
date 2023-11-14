@@ -3,19 +3,30 @@ import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 import Header from '../../components/Header';
 import { useNavigate } from 'react-router-dom';
 
-
-const EntradaTela = () => {
+function EntradaTela(){
   const [matricula, setMatricula] = useState('');
   const [opcao, setOpcao] = useState('listagem_epis');
   const navigate = useNavigate();
+  
+  // URL base para navegação
+  const baseURL = '/relatorio';
+
+  const handleNavigation = () => {
+    // Define a URL com base na opção selecionada
+    const url = opcao === 'listagem_epis' ? `${baseURL}Listagem` : `${baseURL}Inspecao`;
+
+    // Navega para a URL com a matrícula
+    navigate(`${url}?matricula=${matricula}`);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-  
+
+    // Verifique se a matrícula existe
     const matriculaExiste = true;
-  
+
     if (matriculaExiste) {
-      navigate(`/relatorioListagem?matricula=${matricula}`);
+      handleNavigation();
     } else {
       alert('Matrícula não encontrada.');
     }

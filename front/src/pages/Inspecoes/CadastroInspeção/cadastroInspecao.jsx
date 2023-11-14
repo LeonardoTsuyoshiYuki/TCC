@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../../../contexts/auth";
 import { useLocation } from 'react-router-dom';
 import api from "../../../services/services";
 import { ToastContainer, toast } from 'react-toastify';
@@ -26,19 +27,35 @@ const containerStyle = {
     padding: '20px', // Adicione um preenchimento para criar espaço entre o conteúdo e a borda do Container.
 };
 function CadastroInspecao() { // Corrigido o nome da função
+    const { user } = useContext(AuthContext);
     const location = useLocation();
     const matriculaParam = new URLSearchParams(location.search).get('matricula');
     const [perguntas, setPerguntas] = useState([]);
     const [selectedAnswers, setSelectedAnswers] = useState({});
     const [observacoes, setObservacoes] = useState('');
     const [listagem, setListagem] = useState();
-    // console.log(listagem)
+    const [userLogado, setUserLogado] = useState();
+
+    console.log(userLogado)
     useEffect(() => {
         buscaPerguntas();
         if (matriculaParam) {
             buscaData();
+            buscaUserLogado()
         }
-    }, [matriculaParam]); // Adicionado matriculaParam como dependência do useEffect
+    }, [matriculaParam]); 
+    // console.log("user",user)
+
+
+    async function buscaUserLogado() {
+        try {
+            const response = await api.get(`colaboradores?matricula=${user.matricula}`);
+            setUserLogado(response.data.colaborador[0]._id)
+        } catch (error) {
+            console.error('Erro ao buscar User Logado:', error);
+            toast.error('Erro ao buscar User Logado.');
+        }
+    }
 
     async function buscaPerguntas() {
         try {
@@ -78,34 +95,37 @@ function CadastroInspecao() { // Corrigido o nome da função
         const perguntasComRespostas = perguntas.filter((pergunta) => selectedAnswers[pergunta._id] !== null);
         
         const inspecao = {
+            colaborador: userLogado,
             perguntas: [],
             observacoes,
-        };
+          };
         
-        perguntasComRespostas.forEach((pergunta) => {
-            inspecao.perguntas.push({
-                pergunta: pergunta._id,
-                resposta: selectedAnswers[pergunta._id],
-            });
-        });
+          perguntasComRespostas.forEach((pergunta) => {
+            const perguntaComColaborador = {
+              pergunta: pergunta._id,
+              resposta: selectedAnswers[pergunta._id],
+            };
         
-        console.log(inspecao)
-        // Verifica se há uma listagem disponível
-        if (listagem) {
-            try {
-                // Envia os dados para o servidor
-                await api.post(`/inspecao/${listagem}`, inspecao);
-                setSelectedAnswers({});
-                setObservacoes('');
-                toast.success('Inspeção finalizada com sucesso!');
-            } catch (error) {
-                console.error('Erro ao finalizar inspeção:', error);
-                toast.error('Erro ao finalizar inspeção.');
+            inspecao.perguntas.push(perguntaComColaborador);
+          });
+        
+          try {
+            if (listagem) {
+              // Envia os dados para o servidor
+              const response = await api.post(`/inspecao/${listagem}`, inspecao);
+              // Limpa os estados após o sucesso do cadastro
+              setSelectedAnswers({});
+              setObservacoes('');
+              toast.success('Inspeção finalizada com sucesso!');
+              console.log('Inspeção cadastrada com sucesso:', response.data);
+            } else {
+              toast.error('Nenhuma listagem encontrada. Certifique-se de que a matrícula seja válida.');
             }
-        } else {
-            toast.error('Nenhuma listagem encontrada. Certifique-se de que a matrícula seja válida.');
+          } catch (error) {
+            console.error('Erro ao finalizar inspeção:', error);
+            toast.error('Erro ao finalizar inspeção.');
+          }
         }
-    }
     
 
     return (

@@ -20,22 +20,20 @@ function AuthProvider ({ children }) {
 
   const signin = (matricula, password) => {
     const usersStorage = JSON.parse(localStorage.getItem("users_bd"));
-
-    const hasUser = usersStorage?.filter((user) => user.matricula === matricula);
-
-    if (hasUser?.length) {
-      if (hasUser[0].matricula === matricula && hasUser[0].password === password) {
-        const token = Math.random().toString(36).substring(2);
-        localStorage.setItem("user_token", JSON.stringify({ matricula, token }));
-        setUser({ matricula, password });
-        return;
-      } else {
-        return "Matricula ou senha incorretos";
-      }
+  
+    const hasUser = usersStorage?.find(
+      (user) => user.matricula === matricula && user.password === password
+    );
+  
+    if (hasUser) {
+      const token = Math.random().toString(36).substring(2);
+      localStorage.setItem("user_token", JSON.stringify({ matricula, token }));
+      setUser({ matricula });
     } else {
-      return "Usuário não cadastrado";
+      return "Matricula ou senha incorretos";
     }
   };
+  
 
   const signup = (matricula, password) => {
     const usersStorage = JSON.parse(localStorage.getItem("users_bd"));

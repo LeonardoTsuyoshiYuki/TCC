@@ -1,7 +1,9 @@
 const mongoose = require("mongoose");
 const mongoosePaginate = require('mongoose-paginate-v2');
 const Inspecao = mongoose.model('Inspecao');
-const ListagemInspecoes = mongoose.model('ListagemInspecoes'); // Importe o modelo de ListagemInspecoes
+const ListagemInspecoes = mongoose.model('ListagemInspecoes');
+const Pergunta = mongoose.model('Pergunta')
+const Colaborador = mongoose.model('User'); // Adicionei o modelo de Colaborador
 
 const HTTP_STATUS = {
   OK: 200,
@@ -11,63 +13,72 @@ const HTTP_STATUS = {
   NO_CONTENT: 204,
 };
 
+// Função de tratamento de erro genérica
+function handleServerError(resp, errorMessage, error) {
+  console.error(errorMessage, error);
+  resp.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ message: errorMessage });
+}
+
 module.exports = {
   async insertInspecao(req, resp) {
     try {
       const novaInspecao = await Inspecao.create(req.body);
 
-      // Obtenha o _id da ListagemInspecoes dos parâmetros da URL
       const listagemInspecoesId = req.params.id;
 
       if (!listagemInspecoesId) {
-          return resp.status(HTTP_STATUS.BAD_REQUEST).json({ message: "O ID da Listagem de Inspeções é obrigatório." });
+        return resp.status(HTTP_STATUS.BAD_REQUEST).json({ message: "O ID da Listagem de Inspeções é obrigatório." });
       }
-
-      console.log("************listagemInspecoesId", listagemInspecoesId)
 
       const listagemInspecoes = await ListagemInspecoes.findById(listagemInspecoesId);
 
       if (!listagemInspecoes) {
-        return resp.status(404).json({ message: "Listagem de Inspeções não encontrada." });
+        return resp.status(HTTP_STATUS.NOT_FOUND).json({ message: "Listagem de Inspeções não encontrada." });
       }
 
-      // Adicione a nova inspeção à listagem de inspeções
       listagemInspecoes.inspecoes.push(novaInspecao);
       await listagemInspecoes.save();
 
       console.log("Inspeção cadastrada com sucesso:", novaInspecao);
 
-      return resp.status(201).json(novaInspecao);
+      return resp.status(HTTP_STATUS.CREATED).json(novaInspecao);
     } catch (error) {
       console.error("Erro ao cadastrar Inspeção:", error);
-      return resp.status(500).json({ message: "Erro interno ao cadastrar Inspeção." });
+      return resp.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ message: "Erro interno ao cadastrar Inspeção." });
     }
   },
 
   async listInspecao(req, resp) {
     try {
-      const { page } = req.query;
-      const pageNumber = parseInt(page, 10) || 1;
-      const pageSize = 15;
-
+      const id = req.query.id;
+      let consulta = {};
+    
+      if (id) {
+        consulta._id = id;
+      }
+    
       const options = {
-        page: pageNumber,
-        limit: pageSize,
-        populate: {
-          path: "Inspecao.perguntas.pergunta",
-          model: "Pergunta",
-          select: "pergunta resposta",
-          strictPopulate: false, // Desabilita o modo estrito
-        },
+        populate: [
+          {
+            path: 'perguntas.pergunta',
+            model: 'Pergunta',
+            select: 'pergunta',
+          },
+          {
+            path: 'colaborador', 
+            model: 'User', 
+            select: 'nome', 
+          },
+        ],
       };
-
-      const InspecaoPaginadas = await Inspecao.paginate({}, options);
-      return resp.status(HTTP_STATUS.OK).json(InspecaoPaginadas);
+    
+      const resultadoPaginado = await Inspecao.paginate(consulta, options);
+      return resp.status(HTTP_STATUS.OK).json(resultadoPaginado);
     } catch (error) {
-      console.error("Erro ao listar Inspeções:", error);
-      return resp.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ message: "Erro interno ao listar Inspeções." });
+      return handleServerError(resp, 'Erro ao listar Inspeções', error);
     }
   },
+  
 
   async deleteInspecao(req, resp) {
     try {
@@ -97,8 +108,7 @@ module.exports = {
       }
 
       const novaInspecao = {
-        perguntas: perguntas,
-        respostas: respostas,
+        perguntas: perguntas.map((pergunta, index) => ({ pergunta, resposta: respostas[index] })),
         observacoes: observacoes,
       };
 

@@ -51,10 +51,10 @@ routes.delete('/pergunta/:id', PerguntaController.deletePergunta);
 
 // Rotas para Listagem Inspecoes
 routes.get('/listagemInspecao', ListagemInspecoesController.listListagemInspecoes);
-routes.get('/listagemInspecao/:id', ListagemInspecoesController.details);
 routes.post('/listagemInspecao', ListagemInspecoesController.insertListagemInspecoes);
 routes.put('/listagemInspecao/:id', ListagemInspecoesController.updateListagemInspecoes);
 routes.delete('/listagemInspecao/:id', ListagemInspecoesController.deleteListagemInspecoes);
+routes.delete('/listagemInspecao/:listagemId/inspecoes/:inspecaoId', ListagemInspecoesController.deleteInspecao);
 
 // Rotas para Inspeção
 routes.get('/inspecao', InspecaoController.listInspecao);
