@@ -63,6 +63,35 @@ module.exports = {
     }
   },
 
+  async editProdutoListaEpi(req, resp) {
+    try {
+      const { listaId, produtoId } = req.params;
+      const updateData = req.body;
+  
+      const listaEpi = await ListaEpi.findById(listaId);
+  
+      if (!listaEpi) {
+        return resp.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Lista de EPI não encontrada.' });
+      }
+  
+      const produtoIndex = listaEpi.produtos.findIndex(
+        (produto) => produto._id.toString() === produtoId
+      );
+  
+      if (produtoIndex === -1) {
+        return resp.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Produto na Lista de EPI não encontrado.' });
+      }
+  
+      listaEpi.produtos[produtoIndex] = { ...listaEpi.produtos[produtoIndex], ...updateData };
+      await listaEpi.save();
+  
+      console.log('Produto na ListaEpi editado com sucesso:', listaEpi);
+      return resp.status(HTTP_STATUS.OK).json(listaEpi);
+    } catch (error) {
+      return handleServerError(resp, 'Erro ao editar Produto na ListaEpi', error);
+    }
+  },  
+
   async adicionarProdutosListaEpi(req, resp) {
     try {
       const { id } = req.params;

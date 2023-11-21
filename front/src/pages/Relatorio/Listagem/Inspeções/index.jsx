@@ -1,4 +1,4 @@
-import React, { useEffect, useState  } from "react";
+import React, { useEffect, useState } from "react";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import { useLocation } from 'react-router-dom';
 import { ToastContainer, toast } from "react-toastify";
@@ -15,8 +15,7 @@ function ListaInspecoes() {
   const [selectedInspecao, setSelectedInspecao] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // console.log("user", user)
-
+  console.log("selectedInspecao", selectedInspecao)
   const fetchData = async () => {
     try {
       if (matriculaParam) {
@@ -25,9 +24,9 @@ function ListaInspecoes() {
         const idListagemInspecoes = matriculaResponse?.data?.colaborador[0]?.listagemInspecoes?._id;
 
         if (idListagemInspecoes) {
-          const listagemResponse = await api.get(`listagemInspecao/?_id=${idListagemInspecoes}`);
-          // console.log("listagemResponse",listagemResponse.data.docs)
+          const listagemResponse = await api.get(`listagemInspecao/?id=${idListagemInspecoes}`);
 
+          // console.log("listagemResponse",listagemResponse)
           setListagem(listagemResponse.data.docs);
         }
       }
@@ -41,11 +40,9 @@ function ListaInspecoes() {
 
 
   const handleShowModal = async (inspecaoId) => {
-    
     try {
       const inspecaoResponse = await api.get(`inspecao/?id=${inspecaoId}`);
-      console.log("inspecaoResponse", inspecaoResponse); 
-      setSelectedInspecao(inspecaoResponse.data.data);
+      setSelectedInspecao(inspecaoResponse.data);
       setShowModal(true);
     } catch (error) {
       console.error('Erro ao buscar dados da inspeção:', error);
@@ -56,7 +53,6 @@ function ListaInspecoes() {
 
   const handleDelete = async (inspecaoId) => {
     try {
-
       console.log(`Inspeção ${inspecaoId} excluída.`);
       await api.delete(`inspecao/${inspecaoId}`);
     } catch (error) {
@@ -129,6 +125,36 @@ function ListaInspecoes() {
 
           </Table>
         )}
+        <Modal show={showModal} onHide={handleCloseModal}>
+  <Modal.Header closeButton>
+    <Modal.Title>Detalhes da Inspeção</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    {selectedInspecao && selectedInspecao.docs && selectedInspecao.docs.length > 0 && (
+      <>
+        {selectedInspecao.docs.map((inspecao) => (
+          <div key={inspecao._id}>
+            {inspecao.perguntas.map((pergunta) => (
+              <div key={pergunta._id}>
+                <p>{pergunta.pergunta.pergunta}</p>
+                <p>Resposta: {pergunta.resposta}</p>
+              </div>
+            ))}
+            <p>Observações: {inspecao.observacoes}</p>
+            <p>Colaborador: {inspecao.colaborador.nome}</p>
+            <p>Registro: {new Date(inspecao.registro).toLocaleString()}</p>
+          </div>
+        ))}
+      </>
+    )}
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={handleCloseModal}>
+      Fechar
+    </Button>
+  </Modal.Footer>
+</Modal>
+
       </Container>
     </>
   );

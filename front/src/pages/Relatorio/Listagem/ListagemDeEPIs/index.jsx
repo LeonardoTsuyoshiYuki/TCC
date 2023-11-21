@@ -201,7 +201,7 @@ function ListagemTela() {
                   <Form>
 
                     <Form.Group controlId="formEntrega">
-                      <Form.Label>Data de Entrega</Form.Label>
+                      <Form.Label>Data de Devolução</Form.Label>
                       <Form.Control
                         type="datetime-local"
                         value={produtoData.entrega}
@@ -210,7 +210,7 @@ function ListagemTela() {
                     </Form.Group>
 
                     <Form.Group controlId="formVistoEntrega">
-                      <Form.Label>Visto de Entrega</Form.Label>
+                      <Form.Label>Visto de Devolução</Form.Label>
                       <Form.Control
                         as="select"
                         value={produtoData.vistoEntrega}

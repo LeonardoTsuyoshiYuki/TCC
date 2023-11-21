@@ -24,22 +24,29 @@ module.exports = {
   
   async listListagemInspecoes(req, resp) {
     try {
-      const { page } = req.query;
+      const { page, id } = req.query;
       const pageNumber = parseInt(page, 10) || 1;
       const pageSize = 15;
   
-      const options = {
+      // Criar um objeto de filtro com base no ID, se estiver presente na consulta
+      const filter = id ? { _id: id } : {};
+  
+      let listagemInspecoesPaginadas = await ListagemInspecoes.paginate(filter, {
         page: pageNumber,
         limit: pageSize,
         populate: {
-          path: "inspecoes",
-          model: "Inspecao", // Certifique-se de substituir pelo nome correto do modelo
+          path: 'inspecoes.inspecao.colaborador',
+          model: 'User', 
+          select: 'nome', 
         },
-      };
+      });
+
+      // Verificar se não há resultados para o ID fornecido
+      if (id && listagemInspecoesPaginadas.docs.length === 0) {
+        return resp.status(404).json({ message: "Nenhuma inspeção encontrada para o ID fornecido." });
+      }
   
-      const listagemInspecoesPaginadas = await ListagemInspecoes.paginate({}, options);
-  
-      // Agora, a propriedade "inspecoes" estará populada com os detalhes de cada inspeção associada
+      // Retornar os resultados
       return resp.status(200).json(listagemInspecoesPaginadas);
     } catch (error) {
       console.error("Erro ao listar Listagem de Inspeções:", error);

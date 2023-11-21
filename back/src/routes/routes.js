@@ -41,6 +41,7 @@ routes.delete('/produtos/:id', produtosController.deleteProduto)
 routes.get('/listaEpi', listagemEPIController.listListaEpi)
 routes.post('/listaEpi', listagemEPIController.insertListaEpi)
 routes.put('/listaEpi/:id', listagemEPIController.adicionarProdutosListaEpi)
+routes.put('/listaEpi/:listaId/produto/:produtoId', listagemEPIController.editProdutoListaEpi)
 routes.delete('/listaEpi/:id', listagemEPIController.deleteListaEpi)
 
 // Rotas para Pergunta
